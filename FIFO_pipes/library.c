@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 // creates and opens a pipe for r/w | returns the pipe id
-int pipe_open(int size) {
+int pipe_open(int size, pipeT* pipe) {
     int pipefds[2];
     
     //open and check pipe
@@ -14,12 +14,19 @@ int pipe_open(int size) {
       return -1;
     }
 
-    //set buffer to pipe
+    //set buffer to pipe 
     if (fcntl(pipefds[0], F_SETPIPE_SZ, size) == -1){
       perror("size buffer");
       return -1;
     }
     
+    pipe = (pipeT*) malloc(sizeof(pipeT));
+    pipe->id = rand()
+    pipe->size = 
+    
+
+
+
     return pipefds[0];
 };
 
@@ -68,7 +75,7 @@ int my_read(int fd, void *buffer, int size, int *left) {
       if (res == -1)
          return(-1);
       else {
-         if(res == 0){
+         if (res == 0){
             *left = size-read_already;
             return(read_already);
          }
