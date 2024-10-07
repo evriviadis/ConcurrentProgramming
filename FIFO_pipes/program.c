@@ -13,8 +13,9 @@
 
 void* thread1(void* arg){
     printf("Im thread 1\n");
-    int file_dir, characters_read = 0;
-    int startReadIndex = 0, fd;
+    int file_dir;
+    // characters_read = 0;
+    //int startReadIndex = 0, fd;
     
     //open file1
     file_dir = open(arg, O_RDONLY);
@@ -23,9 +24,9 @@ void* thread1(void* arg){
         return((void *)-1);
     }
 
-    char* buffer = (char*) malloc(64 * sizeof(char));
+    //char* buffer = (char*) malloc(64 * sizeof(char));
 
-    do {
+    /*do {
         memset(buffer, 0, 64);
         characters_read = 0;
 
@@ -39,7 +40,7 @@ void* thread1(void* arg){
             pipe_write(fd, buffer[i]);    
         }
         
-    } while (characters_read == 64);
+    } while (characters_read == 64);*/
 
     return NULL;
 }
@@ -50,14 +51,14 @@ void* thread2(void* arg){
     return NULL;
 }
 
+/* 
 int main(int argc, char *argv[]) {
     if (argc != 2) return(1);
     pthread_t p1, p2;
-    pipeT **pipebase;
+    pipeT** pipebase;
 
     pipebase = (pipeT**) malloc(2* sizeof(pipeT*)); //pipebase array allocate
  
-    int pipe_id1 = pipe_open(64, );
 
     pthread_create(&p1, NULL, thread1, argv[1]);
     pthread_create(&p2, NULL, thread2, NULL);
@@ -67,5 +68,41 @@ int main(int argc, char *argv[]) {
 
     printf("this is from main\n");
 
+    return 0;
+} 
+*/
+
+
+int main(int argc, char *argv[]) {
+    pipeT** pipebase;
+    //pthread_t p1, p2;
+    int i;
+
+    // check if starting args are correct
+    if(argc != 2)
+        return(1);
+
+    //allocate memory for the pipebase
+    pipebase = (pipeT**) malloc(NUM_OF_PIPES*sizeof(pipeT*));
+    if(pipebase == NULL) return(-1);
+
+    //create the pipes
+    for(i=0; i<NUM_OF_PIPES; i++){
+        pipebase[i] = pipe_open(PIPE_SIZE);
+        printf("pipe[%d] : %p, size: %d, write open: %d\n", i, pipebase[i], pipebase[i]->size, pipebase[i]->write_open);
+    }
+
+    //create  threads
+    //pthread_create(&p1, NULL, thread1, );
+
+    //like test
+    int write = pipe_write(pipebase[0], 'K');
+    write = pipe_write(pipebase[0], 'a');
+    write = pipe_write(pipebase[0], 't');
+    int write_done = pipe_writeDone(pipebase[0]);
+    write = pipe_write(pipebase[0], 't');
+    printf("%s pipe's buffer, %d, %d, open? %d\n", pipebase[0]->buffer, write, write_done, pipebase[0]->write_open);
+
+    //remember to free memory!!!!!!
     return 0;
 }
