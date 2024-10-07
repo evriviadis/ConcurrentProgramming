@@ -12,35 +12,29 @@
 //GIATI TO FILE AUTO THA EINAI MONO GIA TESTING KAI THA TA KALEI OLA APO TIN MAIN 
 
 void* thread1(void* arg){
-    printf("Im thread 1\n");
-    int file_dir;
-    // characters_read = 0;
-    //int startReadIndex = 0, fd;
+    printf("Hi I'm thread 1\n");
+    int file_dir, read=0, /* p_write, */ active;
+    char byte='\0'; 
+    thread_argsT* args;
+    args = (thread_argsT *)arg;  
+    
     
     //open file1
-    file_dir = open(arg, O_RDONLY);
+    file_dir = open(args->file_name, O_RDONLY);
     if (file_dir == -1) {
         perror("file");
         return((void *)-1);
     }
 
-    //char* buffer = (char*) malloc(64 * sizeof(char));
-
-    /*do {
-        memset(buffer, 0, 64);
-        characters_read = 0;
-
-        characters_read = my_read(file_dir, buffer, 64, &startReadIndex);
-        startReadIndex += characters_read;
-
-        printf("chararcters = %d\n",characters_read);
-        printf("file: %s\n", buffer);
+    while(1) {
+        active = my_read(file_dir, &byte, 1, &read);
+        if(!active)
+            break;
+        /* p_write =  */pipe_write(args->pipe_write, byte); // prepei na baloyme sinthiki gia na stamataei kai na perimenei na diabasei o allos prin ta kanei over write 
         
-        for(int i=0; i<characters_read; i++){
-            pipe_write(fd, buffer[i]);    
-        }
-        
-    } while (characters_read == 64);*/
+        printf("%c", byte);
+    }
+    printf("\n");
 
     return NULL;
 }
@@ -52,7 +46,7 @@ void* thread2(void* arg){
 }
 
 /* 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]){
     if (argc != 2) return(1);
     pthread_t p1, p2;
     pipeT** pipebase;
@@ -75,7 +69,8 @@ int main(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
     pipeT** pipebase;
-    //pthread_t p1, p2;
+    pthread_t p1, p2;
+    thread_argsT thread1_args;
     int i;
 
     // check if starting args are correct
@@ -92,16 +87,25 @@ int main(int argc, char *argv[]) {
         printf("pipe[%d] : %p, size: %d, write open: %d\n", i, pipebase[i], pipebase[i]->size, pipebase[i]->write_open);
     }
 
-    //create  threads
-    //pthread_create(&p1, NULL, thread1, );
+    //initialize arguements
+    thread1_args.file_name = (char*) malloc(sizeof(char)*(strlen(argv[1])+1));
+    if(thread1_args.file_name == NULL){
+        perror("file name:");
+        return(-1);
+    }
 
-    //like test
-    int write = pipe_write(pipebase[0], 'K');
-    write = pipe_write(pipebase[0], 'a');
-    write = pipe_write(pipebase[0], 't');
-    int write_done = pipe_writeDone(pipebase[0]);
-    write = pipe_write(pipebase[0], 't');
-    printf("%s pipe's buffer, %d, %d, open? %d\n", pipebase[0]->buffer, write, write_done, pipebase[0]->write_open);
+    strcpy(thread1_args.file_name, argv[1]);
+    thread1_args.pipe_write = pipebase[0];
+    thread1_args.pipe_read = pipebase[1];
+    
+    //create  threads
+    pthread_create(&p1, NULL, thread1, &thread1_args);
+    pthread_create(&p2, NULL, thread2, NULL);
+
+    pthread_join(p1, NULL);
+    pthread_join(p2, NULL);
+
+    printf("buffer: %s\n",pipebase[0]->buffer);
 
     //remember to free memory!!!!!!
     return 0;

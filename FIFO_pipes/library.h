@@ -24,6 +24,12 @@ typedef struct {
     char* buffer;
 } pipeT;
 
+typedef struct{
+    char* file_name;
+    pipeT* pipe_write;
+    pipeT* pipe_read;
+}thread_argsT;
+
 /*
 extern int pipe_open(int size);
 extern int pipe_write(int p, char c);

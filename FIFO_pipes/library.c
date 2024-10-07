@@ -127,9 +127,9 @@ int pipe_writeDone(pipeT* p){
 // no opened pipe with that id
  
 int pipe_read(pipeT* p, char *c) {
-    if((p == NULL) || !(p->read_open)){
+    if((p == NULL) || !(p->read_open)){ //pipe colsed or doesent exist
         return(-1);
-    }else if(!(p->write_open) && (p->read_edge == p->write_edge)){     /////CHECK THIS/////
+    }else if(!(p->write_open) && (p->read_edge == p->write_edge)){ //pipe closed     /////CHECK THIS/////
         return(0);
     }          
 
@@ -161,3 +161,4 @@ int my_read(int fd, void *buffer, int size, int *left) {
    } while(read_already < size);
    return(read_already); 
 };
+
