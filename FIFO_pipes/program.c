@@ -26,15 +26,33 @@ void* thread1(void* arg){
         return((void *)-1);
     }
 
+
     while(1) {
-        active = my_read(file_dir, &byte, 1, &read);
-        if(!active)
+
+        //sinthiki edo giati if it continuous studying it will find eof
+        //printf("%d write edge\n", args->pipe_write->write_edge);
+        //printf("%d read edge\n", args->pipe_write->read_edge);
+
+        if(args->pipe_write->write_edge >= args->pipe_write->read_edge){
+            active = my_read(file_dir, &byte, 1, &read);
+            if(!active)
+                break;
+            /* p_write =  */pipe_write(args->pipe_write, byte); // prepei na baloyme sinthiki gia na stamataei kai na perimenei na diabasei o allos prin ta kanei over write 
+            
+            //printf("%c", byte);
+        }
+        else{
+            printf("wait\n");                               ///////EDO GINETAI TO WAIT- SVHNOUME TO ELSE///////
             break;
-        /* p_write =  */pipe_write(args->pipe_write, byte); // prepei na baloyme sinthiki gia na stamataei kai na perimenei na diabasei o allos prin ta kanei over write 
-        
-        printf("%c", byte);
+        }
     }
     printf("\n");
+
+    //pipe write done
+    pipe_writeDone(args->pipe_write);
+    printf("%d\n", args->pipe_write->write_open);
+
+    //check pipe 2
 
     return NULL;
 }
@@ -45,32 +63,10 @@ void* thread2(void* arg){
     return NULL;
 }
 
-/* 
-int main(int argc, char *argv[]){
-    if (argc != 2) return(1);
-    pthread_t p1, p2;
-    pipeT** pipebase;
-
-    pipebase = (pipeT**) malloc(2* sizeof(pipeT*)); //pipebase array allocate
- 
-
-    pthread_create(&p1, NULL, thread1, argv[1]);
-    pthread_create(&p2, NULL, thread2, NULL);
-
-    pthread_join(p1, NULL);
-    pthread_join(p2, NULL);
-
-    printf("this is from main\n");
-
-    return 0;
-} 
-*/
-
-
 int main(int argc, char *argv[]) {
     pipeT** pipebase;
     pthread_t p1, p2;
-    thread_argsT thread1_args;
+    thread_argsT thread1_args, thread2_args;
     int i;
 
     // check if starting args are correct
@@ -87,7 +83,7 @@ int main(int argc, char *argv[]) {
         printf("pipe[%d] : %p, size: %d, write open: %d\n", i, pipebase[i], pipebase[i]->size, pipebase[i]->write_open);
     }
 
-    //initialize arguements
+    //initialize thread1's arguements
     thread1_args.file_name = (char*) malloc(sizeof(char)*(strlen(argv[1])+1));
     if(thread1_args.file_name == NULL){
         perror("file name:");
@@ -97,16 +93,20 @@ int main(int argc, char *argv[]) {
     strcpy(thread1_args.file_name, argv[1]);
     thread1_args.pipe_write = pipebase[0];
     thread1_args.pipe_read = pipebase[1];
+
+    //initialize thread2's arguements
+    thread2_args.file_name = thread1_args.file_name;
+    thread2_args.pipe_write = pipebase[1];
+    thread2_args.pipe_read = pipebase[0];
     
-    //create  threads
+    //create  threads and wait them to finish
     pthread_create(&p1, NULL, thread1, &thread1_args);
-    pthread_create(&p2, NULL, thread2, NULL);
+    pthread_create(&p2, NULL, thread2, &thread2_args);
 
     pthread_join(p1, NULL);
     pthread_join(p2, NULL);
 
-    printf("buffer: %s\n",pipebase[0]->buffer);
-
-    //remember to free memory!!!!!!
+    //remember to free memory!!!!!! - for pipebase!!!
+    free(thread1_args.file_name);
     return 0;
 }

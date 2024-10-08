@@ -55,12 +55,8 @@ pipeT* pipe_open(int size) {
    return(p);      //is it correct? thelw na epistrefw id (thetikos akeraios)
 };
 
-
-
-
 // writes 1 byte to the pipe | returns -1 if there is no
 // opened pipe with that id, otherwise 1
-
 
 /* 
 ////OLD PIPE WRITE
@@ -78,7 +74,6 @@ int pipe_write(int p, char c) {
 };
  */
 
-
 /*This function writes 1 byte on the pipe. Returns 1 for success, -1 if the pipe isnt open for writing*/
 int pipe_write(pipeT* p, char c){
    //check if the pipe is open for writing
@@ -88,15 +83,13 @@ int pipe_write(pipeT* p, char c){
    //when the pipe is full we go again to the start - may have conflicts - check in threads!!!!!
    if(p->write_edge == p->size-1)
       p->write_edge = 0;
+   else
+      p->write_edge++;
 
    p->buffer[p->write_edge] = c;
    ///////////////////////////EDO THA PREPEI NA MPEI SINTHIKI GIA TA PIPE WRITE KAI PIPE READ ////////////////////////////////////
-   p->write_edge++;
    return(1);
 };
-
-
-
 
 // closes the pipe for writing | returns -1 if there is no
 // opened pipe with that id, otherwise 1
@@ -118,9 +111,6 @@ int pipe_writeDone(pipeT* p){
     p->write_open = 0;
     return(1);
 };
-
-
-
 
 // reads and removes 1 byte from the pipe | returns 1 for 
 // success, 0 if pipe is empty or closed, -1 if there is 
