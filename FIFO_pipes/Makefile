@@ -1,8 +1,8 @@
 program: program.o library.o
-	gcc -Wall -g program.o library.o -o program
+	gcc -Wall -fsanitize=address -g program.o library.o -o program
 
 program.o: program.c library.h
-	gcc -Wall -g -c program.c
+	gcc -Wall -fsanitize=address -g -c program.c
 	
 library.o: library.c library.h
-	gcc -Wall -g -c library.c
+	gcc -Wall -fsanitize=address -g -c library.c
