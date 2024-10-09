@@ -1,7 +1,7 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
-#define PIPE_SIZE 7
+#define PIPE_SIZE 64
 #define NUM_OF_PIPES 2
 
 typedef struct {

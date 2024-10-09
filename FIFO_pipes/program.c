@@ -32,7 +32,7 @@ void* thread1(void* arg){
         writeEdge = args->pipe_write->write_edge;
         readEdge = args->pipe_write->read_edge;
         
-        printf("1 readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
+        printf("1| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
         //printf("1 write_edge: %d\n", writeEdge);
         //printf("1 read_edge: %d\n", readEdge);
         
@@ -40,13 +40,12 @@ void* thread1(void* arg){
             if (!my_read(file_dir, &byte, 1, &read))
                 break;
             p_write = pipe_write(args->pipe_write->id, byte); // prepei na baloyme sinthiki gia na stamataei kai na perimenei na diabasei o allos prin ta kanei over write 
-            
             //printf("%c", byte);
         }
         else {
             printf("thread 1 is waitting...\n");  
-            printf("buffer from thread 1: %s\n",args->pipe_write->buffer);     
-            break;                      ///////EDO GINETAI TO WAIT- SVHNOUME TO ELSE///////
+            //printf("buffer from thread 1: %s\n",args->pipe_write->buffer);     
+            sleep(2);                     ///////EDO GINETAI TO WAIT- SVHNOUME TO ELSE///////
         }
     }
     printf("\n");
@@ -54,8 +53,7 @@ void* thread1(void* arg){
 
     //pipe write done
     pipe_writeDone(args->pipe_write->id);
-    printf("buffer from thread 1: %s\n",args->pipe_write->buffer);
-    printf("1 girizoume to write open se %d\n", args->pipe_write->write_open);
+    printf("1| girizoume to write open se %d\n", args->pipe_write->write_open);
 
     //check pipe 2
 
@@ -67,7 +65,7 @@ void* thread2(void* arg){
     thread_argsT* args;
     args = (thread_argsT *)arg;
     int readResult= -34;
-    char* byte = NULL;
+    char byte = '\0';
     int writeCycles, readCycles, writeEdge, readEdge;
 
     while(1) {
@@ -76,23 +74,29 @@ void* thread2(void* arg){
         writeEdge = args->pipe_read->write_edge;
         readEdge = args->pipe_read->read_edge;
 
-        printf("2 readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
+        printf("2| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
         //printf("2 readcycl: %d writecycl: %d\n", readCycles, writeCycles);
         //printf("2 write_edge: %d\n", writeEdge);
         //printf("2 read_edge: %d\n", readEdge);
     
         //args->pipe_write->write_edge > args->pipe_write->read_edge
             if ( ( (writeCycles == readCycles) && (writeEdge > readEdge) ) || ( (writeCycles > readCycles) && (writeEdge <= readEdge) )  ) {
-                readResult = pipe_read(args->pipe_read->id, byte);
-                if(readResult){
-                    printf("byte:%c\n",*byte);
-                    //edo prepei na grafei sto file2
+                readResult = pipe_read(args->pipe_read->id, &byte);
+                if(readResult == 0){
+                    printf("MPAGASA TO EXOUME \n");
+                    break;
                 }
                 //an epistrefei 0 kleinei to pipe
             }else{
-                printf("2 result: %d\n",readResult);
-                printf("thread 2 is waitting...\n");
-                sleep(4); 
+                printf("2| result: %d\n",readResult);
+                printf("2| thread 2 is waitting...\n");
+                printf("2| write is open:??: %d\n", args->pipe_read->write_open);
+                sleep(1);
+            }
+
+            if((!args->pipe_read->write_open) && (args->pipe_read->read_edge == args->pipe_read->write_edge) && (args->pipe_read->cyclesRead == args->pipe_read->cyclesWrite)){
+                printf("2| pame gia ipno\n");
+                break;
             }
     }
 

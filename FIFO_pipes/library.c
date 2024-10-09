@@ -44,6 +44,10 @@ int pipe_write(int p, char c){
    if ((pipe == NULL) || (!pipe->write_open))
       return(-1); 
 
+
+   pipe->buffer[pipe->write_edge] = c;
+   printf("1| buffer from pipe write: %c, write Edge inside pipewrite: %d\n",pipebase[p]->buffer[pipe->write_edge], pipe->write_edge);
+   
    //when the pipe is full we go again to the start - may have conflicts - check in threads!!!!!
    if (pipe->write_edge == pipe->size-1){
       pipe->write_edge = 0;
@@ -52,8 +56,6 @@ int pipe_write(int p, char c){
       pipe->write_edge++;
    }
 
-   pipe->buffer[pipe->write_edge] = c;
-   printf("2| buffer from pipe write: %c\n",pipebase[p]->buffer[pipe->write_edge]);
    ///////////////////////////EDO THA PREPEI NA MPEI SINTHIKI GIA TA PIPE WRITE KAI PIPE READ ////////////////////////////////////
    return(1);
 };
@@ -77,12 +79,12 @@ int pipe_read(int p, char *c) {
 
    if ((pipe == NULL) || !(pipe->read_open)) { //pipe colsed or doesent exist
       return(-1);
-   } else if(!(pipe->write_open) && (pipe->read_edge == pipe->write_edge) && (pipe->cyclesRead == pipe->cyclesWrite)) { //pipe closed     /////CHECK THIS/////
+   } else if((!pipe->write_open) && (pipe->read_edge == pipe->write_edge) && (pipe->cyclesRead == pipe->cyclesWrite)) { //pipe closed     /////CHECK THIS/////
       return(0);
    }  
 
    printf("readEdge: %d\n", pipe->read_edge);
-   printf("buffer: %s\n", pipe->buffer);
+   printf("buffer: %c\n", pipe->buffer[pipe->read_edge]);
    *c = pipe->buffer[pipe->read_edge];
    if ((pipe->read_edge) == (pipe->size) - 1) {
       pipe->read_edge = 0;
