@@ -1,0 +1,4 @@
+*.o
+file.copy
+file.copy2
+program

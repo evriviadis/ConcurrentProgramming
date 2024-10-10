@@ -31,11 +31,8 @@ int pipe_open(int size) {
       id_counter++;
    }
 
-   return(p->id);      //is it correct? thelw na epistrefw id (thetikos akeraios)
+   return(p->id); 
 };
-
-// writes 1 byte to the pipe | returns -1 if there is no
-// opened pipe with that id, otherwise 1
 
 /*This function writes 1 byte on the pipe. Returns 1 for success, -1 if the pipe isnt open for writing*/
 int pipe_write(int p, char c){
@@ -113,4 +110,22 @@ int my_read(int fd, void *buffer, int size, int *left) {
       read_already += res;
    } while(read_already < size);
    return(read_already); 
+};
+
+/*This function uses write and checks if it operates properly.*/
+int my_write(int *fd, void *buffer, int size){
+	int res, write_already=0;
+
+	do{
+		res = write(*fd, buffer+(write_already*sizeof(buffer)), size-write_already);
+		if(res == -1){
+			return(-1);
+      }else{ 
+      if(res == 0)
+			return(0);
+      }
+		write_already += res;
+	}while(write_already != size);
+
+	return(1);
 };

@@ -30,5 +30,6 @@ extern int pipe_write(int p, char c);
 extern int pipe_writeDone(int p);
 extern int pipe_read(int p, char *c);
 extern int my_read(int fd, void *buffer, int size, int *left);
+extern int my_write(int *fd, void *buffer, int size);
 
 #endif

@@ -13,10 +13,13 @@
 
 void* thread1(void* arg){
     printf("Hi I'm thread 1\n");
-    int file_dir, read=0, p_write /*  active*/;
+    int file_dir, read=0, p_write;
     char byte='\0'; 
     int writeCycles, readCycles, writeEdge, readEdge;
     thread_argsT* args = (thread_argsT *) arg;  
+    int fileCopy2Length, copy2_fd;
+    char *fileCopy2;
+    int writeResult, readResult;
     
     //open file1
     file_dir = open(args->file_name, O_RDONLY);
@@ -32,31 +35,79 @@ void* thread1(void* arg){
         writeEdge = args->pipe_write->write_edge;
         readEdge = args->pipe_write->read_edge;
         
-        printf("1| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
-        //printf("1 write_edge: %d\n", writeEdge);
-        //printf("1 read_edge: %d\n", readEdge);
+        printf("1|write| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
         
         if ( ( (writeCycles == readCycles) && (writeEdge >= readEdge) ) || ( (writeCycles > readCycles) && (writeEdge < readEdge) ) ) {
             if (!my_read(file_dir, &byte, 1, &read))
                 break;
-            p_write = pipe_write(args->pipe_write->id, byte); // prepei na baloyme sinthiki gia na stamataei kai na perimenei na diabasei o allos prin ta kanei over write 
-            //printf("%c", byte);
+            p_write = pipe_write(args->pipe_write->id, byte); 
+            
+            if(p_write == -1)
+                return(NULL);
         }
         else {
-            printf("thread 1 is waitting...\n");  
-            //printf("buffer from thread 1: %s\n",args->pipe_write->buffer);     
-            sleep(2);                     ///////EDO GINETAI TO WAIT- SVHNOUME TO ELSE///////
+            printf("1|write| thread 1 is waitting...\n");                   
         }
     }
     printf("\n");
 
-
     //pipe write done
     pipe_writeDone(args->pipe_write->id);
-    printf("1| girizoume to write open se %d\n", args->pipe_write->write_open);
+    printf("1|write| girizoume to write open se %d\n", args->pipe_write->write_open);
 
     //check pipe 2
+    //  creats the new file's name
+    fileCopy2Length = strlen(args->file_name) + strlen(".copy2") + 1;
+    fileCopy2 = (char *)malloc(fileCopy2Length * sizeof(char));
+    strcpy(fileCopy2, args->file_name);
+    strcat(fileCopy2, ".copy2");
+    
+    //  opens/creates file 
+    copy2_fd = open(fileCopy2, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (copy2_fd == -1){
+        perror("copy2");
+        return(NULL);
+    }
 
+    while(1){
+        writeCycles = args->pipe_read->cyclesWrite;
+        readCycles = args->pipe_read->cyclesRead;
+        writeEdge = args->pipe_read->write_edge;
+        readEdge = args->pipe_read->read_edge;
+
+        printf("1|read| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
+    
+        //args->pipe_write->write_edge > args->pipe_write->read_edge
+        if ( ( (writeCycles == readCycles) && (writeEdge > readEdge) ) || ( (writeCycles > readCycles) && (writeEdge <= readEdge) )  ) {
+           
+            readResult = pipe_read(args->pipe_read->id, &byte);
+           
+            if(readResult == 1){
+           
+                printf("1|read| character to write %c\n",byte);
+                writeResult = my_write(&copy2_fd, &byte, 1);
+                if(writeResult == -1)
+                    return(NULL);
+           
+            }else if(readResult == 0){
+           
+                //an epistrefei 0 kleinei to pipe
+                printf("1|read| pipe must be destroyed\n");
+                break;
+            }
+            
+        }else{
+            printf("1|read| thread 1 is waitting...\n");
+            printf("1|read| write is open??: %d\n", args->pipe_read->write_open);
+        }
+
+        if((!args->pipe_read->write_open) && (args->pipe_read->read_edge == args->pipe_read->write_edge) && (args->pipe_read->cyclesRead == args->pipe_read->cyclesWrite)){
+            printf("1|read| read from pipe 2 done\n");
+            break;
+        }
+    }
+
+    free(fileCopy2);
     return NULL;
 }
 
@@ -64,42 +115,106 @@ void* thread2(void* arg){
     printf("Hi I'm thread 2\n");
     thread_argsT* args;
     args = (thread_argsT *)arg;
-    int readResult= -34;
+    int readResult= -34, copy_fd, writeResult, read=0;
     char byte = '\0';
     int writeCycles, readCycles, writeEdge, readEdge;
+    int fileCopyLength;
+    char *fileCopy;
 
-    while(1) {
+    //  creats the new file's name
+    fileCopyLength = strlen(args->file_name) + strlen(".copy") + 1;
+    fileCopy = (char *)malloc(fileCopyLength * sizeof(char));
+    strcpy(fileCopy, args->file_name);
+    strcat(fileCopy, ".copy");
+    
+    //  opens/creates file 
+    copy_fd = open(fileCopy, O_RDWR | O_CREAT | O_TRUNC, 0644);
+    if (copy_fd == -1){
+        perror("copy");
+        return(NULL);
+    }
+
+    while(1){
         writeCycles = args->pipe_read->cyclesWrite;
         readCycles = args->pipe_read->cyclesRead;
         writeEdge = args->pipe_read->write_edge;
         readEdge = args->pipe_read->read_edge;
 
-        printf("2| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
-        //printf("2 readcycl: %d writecycl: %d\n", readCycles, writeCycles);
-        //printf("2 write_edge: %d\n", writeEdge);
-        //printf("2 read_edge: %d\n", readEdge);
+        printf("2|read| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
     
         //args->pipe_write->write_edge > args->pipe_write->read_edge
-            if ( ( (writeCycles == readCycles) && (writeEdge > readEdge) ) || ( (writeCycles > readCycles) && (writeEdge <= readEdge) )  ) {
-                readResult = pipe_read(args->pipe_read->id, &byte);
-                if(readResult == 0){
-                    printf("MPAGASA TO EXOUME \n");
-                    break;
-                }
+        if ( ( (writeCycles == readCycles) && (writeEdge > readEdge) ) || ( (writeCycles > readCycles) && (writeEdge <= readEdge) )  ) {
+           
+            readResult = pipe_read(args->pipe_read->id, &byte);
+           
+            if(readResult == 1){
+           
+                printf("2|read| character to write %c\n",byte);
+                writeResult = my_write(&copy_fd, &byte, 1);
+                if(writeResult == -1)
+                    return(NULL);
+           
+            }else if(readResult == 0){
+           
                 //an epistrefei 0 kleinei to pipe
-            }else{
-                printf("2| result: %d\n",readResult);
-                printf("2| thread 2 is waitting...\n");
-                printf("2| write is open:??: %d\n", args->pipe_read->write_open);
-                sleep(1);
-            }
-
-            if((!args->pipe_read->write_open) && (args->pipe_read->read_edge == args->pipe_read->write_edge) && (args->pipe_read->cyclesRead == args->pipe_read->cyclesWrite)){
-                printf("2| pame gia ipno\n");
+                printf("2|read| pipe must be destroyed\n");
                 break;
             }
+            
+        }else{
+            printf("2|read| thread 2 is waitting...\n");
+            printf("2|read| write is open??: %d\n", args->pipe_read->write_open);
+        }
+
+        if((!args->pipe_read->write_open) && (args->pipe_read->read_edge == args->pipe_read->write_edge) && (args->pipe_read->cyclesRead == args->pipe_read->cyclesWrite)){
+            printf("2|read| read from pipe 1 done\n");
+            break;
+        }
     }
 
+    if(close(copy_fd) == -1){
+        perror("close file:");
+        return(NULL);
+    }
+
+    //      STARTING WRITTNG IN PIPE 2
+
+    copy_fd = open(fileCopy, O_RDWR , 0644);
+    if (copy_fd == -1){
+        perror("copy");
+        return(NULL);
+    }
+
+    while(1)
+    {
+        writeCycles = args->pipe_write->cyclesWrite;
+        readCycles = args->pipe_write->cyclesRead;
+        writeEdge = args->pipe_write->write_edge;
+        readEdge = args->pipe_write->read_edge;
+
+        printf("2|write| readCyc: %d writeCyc: %d,  write_edge: %d, read_edge: %d\n", readCycles, writeCycles, writeEdge, readEdge);
+        
+        if ( ( (writeCycles == readCycles) && (writeEdge >= readEdge) ) || ( (writeCycles > readCycles) && (writeEdge < readEdge) ) ) {
+            int resultofread = my_read(copy_fd, &byte, 1, &read);
+            printf("2|writeeeeee| resultofread: %d\n\n\n",resultofread);
+            if(resultofread==0){
+                break;
+            }
+            
+            printf("2|write| THIS IS THE BYTE THAT I JUST READ: %c\n",read);
+            if(pipe_write(args->pipe_write->id, byte) == -1){
+                return(NULL);
+            }
+        }else{
+            printf("2|write| thread 2 is waitting...\n");                   
+        }
+    }
+
+    //pipe write done
+    pipe_writeDone(args->pipe_write->id);
+    printf("2|write| girizoume to write open se %d\n", args->pipe_write->write_open);
+
+    free(fileCopy);
     return (NULL);
 }
 
@@ -114,6 +229,15 @@ int main(int argc, char *argv[]) {
     //allocate memory for the pipebase
     pipebase = (pipeT**) malloc(NUM_OF_PIPES*sizeof(pipeT*));
     if (pipebase == NULL) return(-1);
+
+    /*
+    for(i=0; i<NUM_OF_PIPES; i++){
+        pipeId = pipe_open(PIPE_SIZE);
+        if(pipeId == -1)
+            return(-1);
+        printf("pipe[%d] : %p, size: %d, write open: %d\n", pipeId, pipebase[pipeId], pipebase[pipeId]->size, pipebase[pipeId]->write_open);
+    }
+    */
 
     //create the pipes
     int pipeId1 = pipe_open(PIPE_SIZE);
@@ -147,6 +271,5 @@ int main(int argc, char *argv[]) {
 
     //remember to free memory!!!!!! - for pipebase!!!
     free(thread1_args.file_name);
-    
     return 0;
 }
