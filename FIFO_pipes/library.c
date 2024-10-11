@@ -47,8 +47,8 @@ int pipe_write(int p, char c){
    
    //when the pipe is full we go again to the start - may have conflicts - check in threads!!!!!
    if (pipe->write_edge == pipe->size-1){
-      pipe->write_edge = 0;
       pipe->cyclesWrite++;
+      pipe->write_edge = 0;
    }else{
       pipe->write_edge++;
    }
@@ -84,8 +84,8 @@ int pipe_read(int p, char *c) {
    printf("buffer: %c\n", pipe->buffer[pipe->read_edge]);
    *c = pipe->buffer[pipe->read_edge];
    if ((pipe->read_edge) == (pipe->size) - 1) {
-      pipe->read_edge = 0;
       pipe->cyclesRead++;
+      pipe->read_edge = 0;
    } else {
       pipe->read_edge++;                    ////PROBLEM IN CONCURRENCY/////
    }
@@ -93,7 +93,7 @@ int pipe_read(int p, char *c) {
    return(1);
 }; 
 
-// This function uses read and check if it opperates properly
+/*This function uses read and check if it opperates properly*/
 int my_read(int fd, void *buffer, int size, int *left) {
    int res, read_already=0;
 
