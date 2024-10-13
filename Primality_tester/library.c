@@ -44,23 +44,21 @@ void* worker(void* arg){
     int result, number;
 
     while(1){
-        thread->available = 1;
 
         if(thread->given_work){
             number = thread->number_to_check;
-            thread->available = 0;
             
             result = is_prime(number);
             if(result){
-                printf("The %d is Prime: %d\n\n", number, result);
+                printf("The %d is Prime: %d\n", number, result);
             }
             else{
-                printf("The %d is Not Prime: %d\n\n", number, result);
+                printf("The %d is Not Prime: %d\n", number, result);
             }
             thread->given_work = 0;
-        }
-        
-        if(thread->terminate && !(thread->given_work)){
+            thread->available = 1;
+        }else if(thread->terminate && !(thread->given_work)){
+            //printf("terminate\n");
             break;
         }
     }

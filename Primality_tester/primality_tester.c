@@ -9,13 +9,13 @@
 
 // compile with | gcc -Wall -fsanitize=address -g primality_tester.c -o tester -lm
 int main(int argc, char* argv[]) {
-    if(argc != 3){
-        perror("Wrong number of argc\n");
+    if(argc != 2){
+        perror("Wrong number of args\n");
         return(-1);
     }
 
-    int file_dir, i = 0, result, read=0, number;
-    char *buffer;
+    int /* file_dir, i = 0, result, read=0, number,  */input;
+    /* char *buffer; */
     int N = atoi(argv[1]), found_available_thread;
     thread_infoT** threads = (thread_infoT**) malloc(sizeof(thread_infoT*) * N);
 
@@ -33,6 +33,11 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
+
+
+/*  ///////////////////////////  ILOPOIHSH ME ANAGNOSI APO ARXEIO (lathos me bugs)///////////////////////////
+
+
 
     buffer = (char *)malloc(sizeof(char));
     file_dir = open(argv[2], O_RDONLY);
@@ -74,9 +79,10 @@ int main(int argc, char* argv[]) {
             buffer = (char *)realloc(buffer,(i+1)*sizeof(char));
         }
     }
-
-
-    /*
+ */
+  
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  
 
     // Get input data and assign work to the threads
     printf("Enter integers (Ctrl+D to stop):\n");
@@ -85,17 +91,18 @@ int main(int argc, char* argv[]) {
         found_available_thread = 0;
         while (!found_available_thread) {
             for (int i = 0; i < N; i++) {
-                if (threads[i]->available) {
+                if(threads[i]->available){
                     threads[i]->number_to_check = input; // give input to the thread first! 
                     threads[i]->given_work = 1;          // and then start processing.
                     found_available_thread = 1;
+                    threads[i]->available = 0;   
+                    //printf("new number to worker: %d\n",input);
                     break;
                 }
             }
         }
     }
-
-    */
+    
 
     // After EOF destroy all threads
     for(int i = 0; i < N; i++){
