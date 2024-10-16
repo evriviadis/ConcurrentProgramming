@@ -8,8 +8,9 @@
 #include <unistd.h>
 
 int main(int argc, char* argv[]) {
+    //File name is taken as arguement
     if (argc != 2) {
-        perror("Wrong number of args:");
+        printf("Wrong number of arguemets\n");
         return(-1);
     }
 
@@ -20,9 +21,9 @@ int main(int argc, char* argv[]) {
 
     while (1) {
         read_result = my_read(file_dir, &buffer[i], 1, &read);
-        if (!read_result) {
-            perror("my_read");
 
+        if (!read_result){
+            //File is fully read
             number = atoi(buffer);
             array_size++;
             array = (int *) realloc(array, array_size*sizeof(int));
@@ -32,6 +33,8 @@ int main(int argc, char* argv[]) {
             free(buffer);
             break;
         }
+
+        //When file_dir finds space or \n that's the end
         if ((buffer[i] == '\n') || (buffer[i] == ' ')) {
             i = 0;
             number = atoi(buffer);
@@ -39,26 +42,28 @@ int main(int argc, char* argv[]) {
             array = (int *) realloc(array, array_size*sizeof(int));
             array[array_size-1] = number;
             buffer = (char *) realloc(buffer, sizeof(char));
-        } 
-        else {
+        }else{
             i++;
             buffer = (char *) realloc(buffer,(i+1)*sizeof(char));
         }
     }
 
-    printf("prin to sort\n");
+    printf("- - - BEFORE SORTING - - -\n");
     for (int i = 0; i < array_size; i++) {
         printf("%d ", array[i]);
     }
-    printf("\n\n\n");
+    printf("\n\n");
     
+    //Initialize matrix
     arrayT* matrix = (arrayT *) malloc(sizeof(arrayT));
     matrix->array = array;
     matrix->length = array_size;
     matrix->left = 0;
+
+    //Calliing parallel merge
     parallel_merge(matrix);
 
-    printf("\n\nmeta to sort %d\n", matrix->length);
+    printf("- - - AFTER SORTING - - - %d\n", matrix->length);
     for (int i = 0; i < array_size; i++) {
         printf("%d ", matrix->array[i]);
     }
@@ -66,6 +71,5 @@ int main(int argc, char* argv[]) {
 
     free(array);
     free(matrix);
-
     return 0;
 }
