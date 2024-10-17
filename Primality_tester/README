@@ -2,9 +2,8 @@ CONCURRENT PROGRAMING - ASSIGNMENT SERIES 1 - PRIMALITY TESTER
 
 DESCRIPTION
 This program takes positive integers as input and checks if they are prime or not. What's special about this, is that main doesn't execute the tests.
-Instead, it assigns them to N worker threads that have been created to serve her. In that way, the analysis becomes faster. Threads can check none, one or many
-numbers for primality it depends on main's assignments, on how fast a thread finishes and if there are many threads available to test numbers concurrently.
- 
+Instead, it assigns them to N worker threads that have been created to test them. In that way, the analysis becomes faster. Threads can check none, one or many numbers for primality it depends on main's assignments, on how fast a thread finishes and if there are many threads available to test numbers concurrently.
+
 
 DEVELOPMENT ENVIRONMENT
 Programming language: C
@@ -18,19 +17,24 @@ Compile the program:
     On a terminal go to the directory named Primality_tester.
     Compile with the command "make".
     Then, the executable file named "primality_tester" is created.
+
+    To compile without the "make" command it is necessary to:
+    1. Compile seperately:  gcc -Wall -fsanitize=address -g -c primality_tester.c
+                            gcc -Wall -fsanitize=address -g -c library.c -lm
+    2. Link: gcc -Wall -fsanitize=address -g primality_tester.o library.o -o primality_tester -lm
  
 
 RUNNING PROCESS
-Run the program with this command: ./primality_tester N < <file>
 Create a file that contains positive integers seperated with ' ' or '\n'. 
 Output is displayed on screen (stdout) and depicts if a number is prime (1)
 or if it not (0).
+Run the program with the command: ./primality_tester N < <file>
 
 
 TEST CASES
 To test the correctness - performance of our program we run it for small and big numbers.
-Firstly,.........
-
+First of all we create files with random integers (file1 = 100 int), (file2 = 500 int), (file3 = 2000 int)
+Then we run the program by monitoring the executions for N=10, N=20, N=40 threads.
 
 
 AUTHORS AND ACKNOWLEDGEMENT
