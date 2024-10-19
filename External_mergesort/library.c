@@ -1,8 +1,12 @@
 #include "library.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <pthread.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
 
 /*This function merges two sorted arrays*/
 void merge(int arr[], int left, int mid, int right) {
@@ -10,6 +14,7 @@ void merge(int arr[], int left, int mid, int right) {
 
     int n1 = mid - left + 1;  // Size of the left half
     int n2 = right - mid;     // Size of the right half
+
     int L[n1], R[n2];
 
     // Copy data to temporary arrays L[] and R[]
@@ -20,7 +25,7 @@ void merge(int arr[], int left, int mid, int right) {
 
     // Merge the temporary arrays back into arr[left..right]
     i = 0;
-    j = 0; 
+    j = 0;
     int k = left;
 
     // Merge process
@@ -65,74 +70,128 @@ void mergeSort(int arr[], int left, int right) {
     return;
 }
 
-/*This function merges an array using threads*/
-void* parallel_merge(void* arg) {
-    pthread_t t1, t2;
-    arrayT *matrix = (arrayT*) arg;
-    //int  i;
-   
-   //Matrix has size greater than MIN_SIZE
-    if (matrix->length > MIN_SIZE) {
-        arrayT *matrix1 = (arrayT *) malloc(sizeof(arrayT));
-        arrayT *matrix2 = (arrayT *) malloc(sizeof(arrayT));
+/*This function merges a file using threads*/
+void* parallel_merge(void* arg){
+    pthread_t th1, th2;
+    int *buffer, left=0, left_read =0;
+    thread_argsT* file = (thread_argsT*) arg;
+    thread_argsT *file1, *file2; //left half, right half
+
+    if(file->size > MIN_SIZE){
+        // seperate each time the file in half and create threads
+        file1 = (thread_argsT*) malloc(sizeof(thread_argsT));
+        file2 = (thread_argsT*) malloc(sizeof(thread_argsT));
+        file1->finish = 0;
+        file2->finish = 0;
+        file1->file_name = file->file_name;
+        file2->file_name = file->file_name;
         
-        //Initialize the recrusively made array halves
-        matrix1->length = matrix->length / 2;
-        matrix1->left = matrix->left;
-        matrix2->length = matrix->length - matrix1->length;
-        matrix2->left = matrix->left;
-        matrix1->array = matrix->array;
-        matrix2->array = matrix->array + matrix1->length;
+        // file1
+        file1->size = file->size/2;
+        file1->start_fd = open(file->file_name, O_RDWR);
+        file1->end_fd = open(file->file_name, O_RDWR);
+        file1->offset = file->offset;
 
-        /*
-        GIA TON AGAPHMENO EVRI
-        printf("|1| matrix: len: %d, left %d\n", matrix1->length, matrix1->left);
-        for (i = 0; i < matrix1->length; i++) {
-            printf("%d ", matrix1->array[i]);
+        lseek(file1->start_fd, file1->offset * sizeof(int), SEEK_SET);
+        lseek(file1->end_fd, (file->offset + file1->size) * sizeof(int), SEEK_CUR);
+
+        // file2
+        file2->size = file->size - file1->size;
+        file2->start_fd = open(file->file_name, O_RDWR);
+        file2->end_fd = open(file->file_name, O_RDWR);
+        file2->offset = file->offset + file1->size;
+        
+        lseek(file2->start_fd, (file2->offset) * sizeof(int), SEEK_SET);
+        lseek(file2->end_fd, (file->offset + file2->size) * sizeof(int), SEEK_SET);
+
+        pthread_create(&th1, NULL, parallel_merge, file1);
+        pthread_create(&th2, NULL, parallel_merge, file2);
+
+        while(1){
+            if(file1->finish && file2->finish){
+                break;
+            }
         }
-        printf("\n\n");
 
-        printf("|2| matrix: len: %d, left %d\n", matrix2->length, matrix2->left);
-        for (i = 0; i < matrix2->length; i++) {
-            printf("%d ", matrix2->array[i]);
+        //MERGE TWO BUFFERS
+        buffer = (int*)malloc(sizeof(int)*(file->size));
+        if(buffer == NULL){
+            perror("malloc:");
+            return(NULL);
         }
-        printf("\n\n");
-        */
 
-       //Create recursively threads to sort the array
-        pthread_create(&t1, NULL, parallel_merge, matrix1);
-        pthread_create(&t2, NULL, parallel_merge, matrix2);
+        my_read(file1->start_fd, buffer, sizeof(int)*file1->size, &left_read);
+        lseek(file1->start_fd, -sizeof(int)*file1->size, SEEK_CUR);
 
-        //Wait for threads to finish
-        pthread_join(t1, NULL);
-        pthread_join(t2, NULL);
+        my_read(file2->start_fd, buffer+file1->size, sizeof(int)*file2->size, &left_read);
+        lseek(file2->start_fd, -sizeof(int)*file2->size, SEEK_CUR);
 
-        //Recursively merge two already sorted arrays
-        merge(matrix->array, matrix->left, matrix->length/2-1, matrix->length - 1);
+        merge(buffer, left, file->size/2-1, file->size - 1);
 
-        free(matrix1);
-        free(matrix2);
-    }else{ 
-        mergeSort(matrix->array, matrix->left, matrix->length - 1);
+        my_write(&file->start_fd, buffer, sizeof(int)*file->size);
+        lseek(file->start_fd, -sizeof(int)*file->size, SEEK_CUR);
+
+        file->finish = 1;
+        close(file1->end_fd);
+        close(file1->start_fd);
+        close(file2->start_fd);
+        close(file2->end_fd);
+        free(buffer);
+        free(file1);
+        free(file2);
+    } else {
+        buffer = (int*)malloc(sizeof(int)*file->size);
+        if(buffer == NULL){
+            perror("malloc:");
+            return(NULL);
+        }                       
+
+        my_read(file->start_fd, buffer, sizeof(int)*file->size, &left_read);
+        lseek(file->start_fd, -sizeof(int)*file->size, SEEK_CUR);
+
+        mergeSort(buffer, left, file->size-1);
+
+        my_write(&file->start_fd, buffer, sizeof(int)*file->size);
+        lseek(file->start_fd, -sizeof(int)*file->size, SEEK_CUR);
+
+        file->finish = 1;
+        free(buffer);
     }
     return(NULL);
 }
 
 /*This function uses read and check if it opperates properly*/
-int my_read(int fd, void *buffer, int size, int *left){
+int my_read(int fd, void *buffer, int size, int *left_read){
    int res, read_already=0;
 
-    do{
-        res = read(fd, buffer+(read_already*sizeof(char)), size-read_already);
-        if (res == -1){
-
-            return(-1);
-        }else if(res == 0){
-            *left = size-read_already;
+   do{
+      res = read(fd, buffer+(read_already*sizeof(int)), size-read_already);
+      if(res == -1)
+         return(-1);
+      else{
+         if(res == 0){
+            *left_read = size-read_already;
             return(read_already);
-        }
+         }
+      }
+      read_already += res;
+   }while(read_already < size);
+   return(read_already); 
+};
 
-        read_already += res;
-    }while(read_already < size);
-    return(read_already); 
+/*This function uses write and checks if it operates properly*/
+int my_write(int *fd, void *buffer, int size){
+	int res, write_already=0;
+
+	do{
+	    res = write(*fd, buffer+(write_already*sizeof(buffer)), size-write_already);
+		if(res == -1){
+			return(-1);
+        }else{ 
+            if(res == 0)
+			   return(0);
+        }
+		write_already += res;
+	}while(write_already != size);
+   return(1);
 };
