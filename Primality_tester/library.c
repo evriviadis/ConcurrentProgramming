@@ -3,29 +3,9 @@
 #include <math.h>
 #include <unistd.h>
 
-/*This function uses read and check if it opperates properly*/
-int my_read(int fd, void *buffer, int size, int *left){
-   int res, read_already=0;
-
-    do{
-        res = read(fd, buffer+(read_already*sizeof(char)), size-read_already);
-        if (res == -1){
-
-            return(-1);
-        }else if(res == 0){
-            *left = size-read_already;
-            return(read_already);
-        }
-
-        read_already += res;
-    }while(read_already < size);
-    return(read_already); 
-};
-
 /*This function calculates the primality of a number*/
 int is_prime(int num){
     int i;
-
     if(num <= 1){
         return 0;
     }
@@ -45,8 +25,8 @@ void* worker(void* arg){
     thread_infoT* thread = (thread_infoT*) arg;
     
     while(1){
-        if(thread->given_work){           
-            result = is_prime(thread->number_to_check);
+        if(thread->given_work){     //this worker is busy        
+            result = is_prime(thread->number_to_check); 
             if(result){
                 printf("The %d is Prime: %d\n",thread->number_to_check, result);
             }
@@ -54,7 +34,7 @@ void* worker(void* arg){
                 printf("The %d is Not Prime: %d\n", thread->number_to_check, result);
             }
             thread->given_work = 0;
-            thread->available = 1;
+            thread->available = 1;      //make available again
         }else if(thread->terminate && !(thread->given_work)){
             thread->finished = 1;
             break;

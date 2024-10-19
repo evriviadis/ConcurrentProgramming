@@ -15,6 +15,5 @@ typedef struct {
 
 /*FUNCTIONS' PROTOTYPES*/
 extern int is_prime(int num);
-extern int my_read(int fd, void *buffer, int size, int *left);
 extern void* worker(void* arg);
 #endif
