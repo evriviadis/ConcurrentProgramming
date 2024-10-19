@@ -17,18 +17,18 @@ void merge(int arr[], int left, int mid, int right) {
 
     int L[n1], R[n2];
 
-    // Copy data to temporary arrays L[] and R[]
+    //Copy data to temporary arrays L[] and R[]
     for(int i = 0; i < n1; i++)
         L[i] = arr[left + i];
     for(int j = 0; j < n2; j++)
         R[j] = arr[mid + 1 + j];
 
-    // Merge the temporary arrays back into arr[left..right]
+    //Merge the temporary arrays back into arr[left..right]
     i = 0;
     j = 0;
     int k = left;
 
-    // Merge process
+    //Merge process
     while(i < n1 && j < n2){
         if(L[i] <= R[j]){
             arr[k] = L[i];
@@ -40,7 +40,7 @@ void merge(int arr[], int left, int mid, int right) {
         k++;
     }
 
-    // Copy remaining elements of L[] and R[], if any
+    //Copy remaining elements of L[] and R[], if any
     while(i < n1){
         arr[k] = L[i];
         i++;
@@ -57,7 +57,7 @@ void merge(int arr[], int left, int mid, int right) {
 
 /*This function implements MergeSort algorithm*/
 void mergeSort(int arr[], int left, int right) {
-    if (left < right) {
+    if (left < right){
         int mid = left + (right - left) / 2;
 
         //Recursively sort the first and second halves
@@ -78,9 +78,13 @@ void* parallel_merge(void* arg){
     thread_argsT *file1, *file2; //left half, right half
 
     if(file->size > MIN_SIZE){
-        // seperate each time the file in half and create threads
+        //Seperate file in half and create threads
         file1 = (thread_argsT*) malloc(sizeof(thread_argsT));
         file2 = (thread_argsT*) malloc(sizeof(thread_argsT));
+        if(file1==NULL || file2==NULL){
+            perror("malloc");
+            return NULL;
+        }        
         file1->finish = 0;
         file2->finish = 0;
         file1->file_name = file->file_name;
@@ -93,7 +97,7 @@ void* parallel_merge(void* arg){
         file1->offset = file->offset;
 
         lseek(file1->start_fd, file1->offset * sizeof(int), SEEK_SET);
-        lseek(file1->end_fd, (file->offset + file1->size) * sizeof(int), SEEK_CUR);
+        lseek(file1->end_fd, (file1->offset + file1->size) * sizeof(int), SEEK_CUR);
 
         // file2
         file2->size = file->size - file1->size;
@@ -104,6 +108,7 @@ void* parallel_merge(void* arg){
         lseek(file2->start_fd, (file2->offset) * sizeof(int), SEEK_SET);
         lseek(file2->end_fd, (file->offset + file2->size) * sizeof(int), SEEK_SET);
 
+        //Create threads and busy wait them to finish
         pthread_create(&th1, NULL, parallel_merge, file1);
         pthread_create(&th2, NULL, parallel_merge, file2);
 
@@ -113,7 +118,7 @@ void* parallel_merge(void* arg){
             }
         }
 
-        //MERGE TWO BUFFERS
+        //Merge the sorted pieces in file
         buffer = (int*)malloc(sizeof(int)*(file->size));
         if(buffer == NULL){
             perror("malloc:");
@@ -131,15 +136,15 @@ void* parallel_merge(void* arg){
         my_write(&file->start_fd, buffer, sizeof(int)*file->size);
         lseek(file->start_fd, -sizeof(int)*file->size, SEEK_CUR);
 
-        file->finish = 1;
-        close(file1->end_fd);
+        //Close fds and free memory to return
         close(file1->start_fd);
+        close(file1->end_fd);
         close(file2->start_fd);
         close(file2->end_fd);
         free(buffer);
         free(file1);
         free(file2);
-    } else {
+    }else{
         buffer = (int*)malloc(sizeof(int)*file->size);
         if(buffer == NULL){
             perror("malloc:");
@@ -153,10 +158,9 @@ void* parallel_merge(void* arg){
 
         my_write(&file->start_fd, buffer, sizeof(int)*file->size);
         lseek(file->start_fd, -sizeof(int)*file->size, SEEK_CUR);
-
-        file->finish = 1;
         free(buffer);
     }
+    file->finish = 1;
     return(NULL);
 }
 

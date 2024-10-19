@@ -1,0 +1,42 @@
+CONCURRENT PROGRAMING - ASSIGNMENT SERIES 1 - EXTERNAL_MERGESORT
+
+DESCRIPTION
+This program is an implementation of External MergeSort alrgorithm using threads to syncronize the whole process of merging a file. 
+The program takes as input a binary file that we read as integers and it recursively creates threads to break the file in smaller pieces.
+If the file has size less or equal than MIN_SIZE (=64) it is sorted right away using MergeSort alrgorithm, without creating any threads,
+but only a buffer that is used for the sorting. Arter that, the function returns and the recursive continues by merging the sorted pieces
+into the file, creating in the same file a modified verion of the input. That is no other than a soerted binary file.
+
+
+DEVELOPMENT ENVIRONMENT
+Programming language: C
+Operating System: Linux
+Compiler: GCC
+
+
+COMPILATION PROCESS
+Ensure GCC is instaled: sudo apt-get install gcc
+
+Compile the program:
+    On a terminal go to the directory named External_mergeSort.
+    Run with the command "make".
+    Then, the executable file named "mergeSort" is created. 
+
+    To compile without the "make" command it is necessary to:                     
+    1. Compile seperately:  gcc -Wall -fsanitize=address -g -c mergeSort.c
+                            gcc -Wall -fsanitize=address -g -c library.c
+    2. Link: gcc -Wall -fsanitize=address -g mergeSort.o library.o -o mergeSort
+
+
+TESTING PROCESS
+To run the program you have to create a binary file and then run with this command: ./mergeSort <file>.
+To crete the binary file we have included a python script that creates randomly a binary file of integers.
+In order to do that, run the file with the command: python3 binary_file_maker.py
+Python has to be installed.
+
+
+TEST CASES
+In order to test this project we ran several test cases. The most important to refer are:
+1. 20 random numbers with small N (N=3)
+2. 200 random numbers with small N (N=2) and big N (N=64)
+3. 2000 random numbers with big N (N=64)

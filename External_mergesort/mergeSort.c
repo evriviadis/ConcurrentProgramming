@@ -1,6 +1,5 @@
 #include "library.h"
 #include <stdio.h>
-#include <pthread.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -28,10 +27,9 @@ int main(int argc, char* argv[]) {
     }
     strcpy(file->file_name, argv[1]);
 
-    // Open a file multiple times to monitor it's start mid end
     file->start_fd = open(file->file_name, O_RDWR);
     file->end_fd = open(file->file_name, O_RDWR);
-    if(file->start_fd < 0 || file->end_fd < 0){
+    if((file->start_fd < 0) || (file->end_fd < 0)){
         perror("open");
         return(-1);
     }
@@ -39,28 +37,28 @@ int main(int argc, char* argv[]) {
     file->offset = 0;
     file->size = lseek(file->end_fd, 0, SEEK_END);
     file->size = file->size / sizeof(int);
-    printf("size: %d\n", file->size);
 
-    //callinggg
+    //Merges the file
     parallel_merge(file);
 
-    int *buffer;
+    int *buffer, left=0;
     buffer = (int*)malloc(sizeof(int)*(file->size));
     if(buffer == NULL){
         perror("malloc:");
         return(-1);
     }
 
-    int left=0;
+    //Print the file to check if it is sorted
     my_read(file->start_fd, buffer, sizeof(int)*file->size, &left);
     lseek(file->start_fd, -sizeof(int)*file->size, SEEK_CUR);
 
-    printf("\nTHIS IS FROM MAIN - AFTER MERGE - HOPEFULLY PERFECT\n");
+    printf("\nSORTED FILE\n");
     for(int i=0; i<file->size; i++){
         printf("%d ", buffer[i]);
     }
     printf("\n");
 
+    //Close fds and free memory
     close(file->start_fd);
     close(file->end_fd);
 
