@@ -7,11 +7,10 @@
 pipeT** pipebase = NULL;
 int id_counter = 0 ;
 
-/*This function opens a pipe- Allocates dynamically a buffer that its end matches its start (ring buffer)
-then the buffer is initiallized and ready to be used. pipeopen returns pipe id*/
+/*This function opens a pipe- Allocates dynamically
+and initializes a ring buffer. Returns pipe id.*/
 int pipe_open(int size) {
    pipeT* p = (pipeT *) malloc(sizeof(pipeT));
-   
    if (p == NULL) 
       return(-1);
 
@@ -19,7 +18,7 @@ int pipe_open(int size) {
    p->read_edge = 0;
    p->write_edge = 0;
    p->read_open = 1;
-   p->write_open = 1;      //both edges for reading and writing are open
+   p->write_open = 1; 
    p->cyclesRead = 0;
    p->cyclesWrite = 0;
    p->size = size;
@@ -34,18 +33,18 @@ int pipe_open(int size) {
    return(p->id); 
 };
 
-/*This function writes 1 byte on the pipe. Returns 1 for success, -1 if the pipe isnt open for writing*/
+/*This function writes 1 byte on the pipe. 
+Returns 1 for success, -1 if the pipe isnt open for writing*/
 int pipe_write(int p, char c){
    pipeT* pipe = pipebase[p];
    //check if the pipe is open for writing
    if ((pipe == NULL) || (!pipe->write_open))
       return(-1); 
 
-
    pipe->buffer[pipe->write_edge] = c;
-   printf("1| buffer from pipe write: %c, write Edge inside pipewrite: %d\n",pipebase[p]->buffer[pipe->write_edge], pipe->write_edge);
+   //printf("1| buffer from pipe write: %c, write Edge inside pipewrite: %d\n",pipebase[p]->buffer[pipe->write_edge], pipe->write_edge);
    
-   //when the pipe is full we go again to the start - may have conflicts - check in threads!!!!!
+   //when the pipe is full we go again to the start of the buffer
    if (pipe->write_edge == pipe->size-1){
       pipe->cyclesWrite++;
       pipe->write_edge = 0;
@@ -53,41 +52,41 @@ int pipe_write(int p, char c){
       pipe->write_edge++;
    }
 
-   ///////////////////////////EDO THA PREPEI NA MPEI SINTHIKI GIA TA PIPE WRITE KAI PIPE READ ////////////////////////////////////
    return(1);
 };
 
-/*This function closes a pipe for writing. Returns 1 for success, -1 if the pipe isnt open for writing*/
+/*This function closes a pipe for writing. 
+Returns 1 for success, -1 if the pipe isnt open for writing*/
 int pipe_writeDone(int p){
    pipeT* pipe = pipebase[p];
    //check if the pipe doesnt exist
-   if(pipe == NULL)                    //check condition////
-        return(-1);
+   if(pipe == NULL)                    
+      return(-1);
 
     pipe->write_open = 0; 
     return(1);
 };
 
-// reads and removes 1 byte from the pipe | returns 1 for 
-// success, 0 if pipe is empty or closed, -1 if there is 
-// no opened pipe with that id
+/*This function reads and removes 1 byte from the pipe.
+Returns 1 for success, 0 for empty or closed pipe, -1 otherwise.*/
 int pipe_read(int p, char *c) {
    pipeT* pipe = pipebase[p];
 
    if ((pipe == NULL) || !(pipe->read_open)) { //pipe colsed or doesent exist
       return(-1);
-   } else if((!pipe->write_open) && (pipe->read_edge == pipe->write_edge) && (pipe->cyclesRead == pipe->cyclesWrite)) { //pipe closed     /////CHECK THIS/////
+   } else if((!pipe->write_open) && (pipe->read_edge == pipe->write_edge) &&
+                   (pipe->cyclesRead == pipe->cyclesWrite)) { //pipe closed
       return(0);
    }  
 
-   printf("readEdge: %d\n", pipe->read_edge);
-   printf("buffer: %c\n", pipe->buffer[pipe->read_edge]);
+   //printf("readEdge: %d\n", pipe->read_edge);
+   //printf("buffer: %c\n", pipe->buffer[pipe->read_edge]);
    *c = pipe->buffer[pipe->read_edge];
    if ((pipe->read_edge) == (pipe->size) - 1) {
       pipe->cyclesRead++;
       pipe->read_edge = 0;
    } else {
-      pipe->read_edge++;                    ////PROBLEM IN CONCURRENCY/////
+      pipe->read_edge++;
    }
 
    return(1);

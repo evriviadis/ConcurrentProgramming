@@ -10,7 +10,7 @@ def write_integers_to_binary_file(file_name, integers):
 
 file_name = 'integers.bin'
 integers = []  # List of integers to write
-for _ in range(2000):
+for _ in range(100):
     integers.append(random.randint(1, 1000))
 
 write_integers_to_binary_file(file_name, integers)
