@@ -6,3 +6,5 @@ primality_tester.o: primality_tester.c library.h
 	
 library.o: library.c library.h
 	gcc -Wall -fsanitize=address -g -c library.c -lm
+
+
