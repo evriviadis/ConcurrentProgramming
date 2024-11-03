@@ -1,15 +1,10 @@
 #include "lib2.h"
-#include "../1/library.h"
-#include <stdio.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 /*This is main. It assigns jobs to all threads created,
 and tells them when it's time to finish.*/
 int main(int argc, char* argv[]){
     int N = atoi(argv[1]);
-    int found_available_thread, input, i;
+    int input, i;
     thread_infoT** threads;
 
     if(argc != 2){
@@ -31,11 +26,24 @@ int main(int argc, char* argv[]){
             perror("malloc");
             return(-1);
         }
-        
-        threads[i]->finished = 0;
-        threads[i]->available = 1;
-        threads[i]->given_work = 0;
-        threads[i]->terminate = 0;
+
+        threads[i]->s1 = (mysem_t*) malloc(sizeof(mysem_t));
+        threads[i]->s2 = (mysem_t*) malloc(sizeof(mysem_t));
+
+        threads[i]->s1->init = 0;
+        threads[i]->s2->init = 0;
+
+        if(mysem_init((threads[i]->s1), 1) == -1){
+            printf("something wrong 1\n");
+            return(-1);
+        }
+
+        if(mysem_init((threads[i]->s2), 0) == -1){
+            printf("something wrong 2\n");
+            return(-1);
+        }
+
+        threads[i]->terminate = 0; 
         threads[i]->number_to_check = 0;
         
         if(pthread_create(&(threads[i]->thread_id), NULL, worker, threads[i]) != 0){
@@ -46,47 +54,39 @@ int main(int argc, char* argv[]){
 
     //Get input data and assign work to the threads
     printf("Enter integers (Ctrl+D to stop):\n");
+    int j = 0;
     while(scanf("%d", &input) != EOF){
-        // Loop to search until we find available thread
-        found_available_thread = 0;
-        while(!found_available_thread){
-            for(int i = 0; i < N; i++){
-                if(threads[i]->available){
-                    threads[i]->number_to_check = input; // give input to the thread first! 
-                    threads[i]->given_work = 1;          // and then start processing.
-                    found_available_thread = 1;
-                    threads[i]->available = 0;   
-                    break;
-                }
-            }
+        for(; j<N; j++){
+            mysem_down(threads[j]->s1);
+            threads[j]->number_to_check = input;
+            mysem_up(threads[j]->s2);
+            break;
         }
+        if(j>=N) j = 0;
     }
-    
+
     //After EOF wait for workers to finish their job
     for(i = 0; i < N; i++){   
-        if(threads[i]->available && !threads[i]->given_work){
-            threads[i]->terminate = 1;
-        }else{
-            i--;
+        mysem_down(threads[i]->s1);
+        threads[i]->terminate = 1;
+        mysem_up(threads[i]->s2);
+        mysem_down(threads[i]->s1);
+        mysem_up(threads[i]->s1);
+
+
+        if(mysem_destroy(threads[i]->s1) == -1){
+            printf("error in detsroy\n");
         }
+
+        if(mysem_destroy(threads[i]->s2) == -1){
+            printf("error in detsroy\n");
+        }
+
+        free(threads[i]->s1);
+        free(threads[i]->s2);
+        free(threads[i]);
     }
 
-    //Free workers' memory and destroy them
-    for(i = 0; i < N; i++){
-        if(threads[i]->finished){
-            free(threads[i]);
-        }else{
-            i--;
-        }
-    }
     free(threads);
-
-    mysem_t s[3];
-    
-    for(int i=0; i<3; i++){
-        s[i].init = 0;
-        s[i].sem_id = -1;
-        printf("%d init \n", mysem_init(&s[i],1));
-    }
     return 0;
 }

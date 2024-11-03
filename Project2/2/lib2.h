@@ -1,19 +1,20 @@
 #ifndef LIBRARY_H
 #define LIBRARY_H
 
-#include<pthread.h>
+#include "../1/library.h"
+#include <pthread.h>
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-/*THREAD'S ARGUEMENTS*/
 typedef struct {
     pthread_t thread_id;
-    int available;          // changes in 'worker' to notify 'main'
-    int given_work;         // changes in 'main' and 'worker' to notify 'worker'
+    mysem_t *s1, *s2;
     int number_to_check;
-    int terminate;          // takes value 1 to destroy the thread
-    int finished;
+    int terminate; // takes value 1 to destroy the thread
 } thread_infoT;
 
-/*FUNCTIONS' PROTOTYPES*/
 extern int is_prime(int num);
 extern void* worker(void* arg);
 #endif

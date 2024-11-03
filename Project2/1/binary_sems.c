@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
 
     s.init = 0;
     s.sem_id = -1;
-    pthread_mutex_init(&s.mutex, NULL);
+    
 
     if(mysem_init(&s, 1) == -1){
         printf("error\n");
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
         pthread_join(th[i], NULL);
     }
 
-    mysem_destroy(&s);
+    //mysem_destroy(&s);
 
     return(0);
 }
