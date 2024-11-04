@@ -72,7 +72,7 @@ int main(int argc, char* argv[]){
         mysem_up(threads[i]->s2);
         mysem_down(threads[i]->s1);
         mysem_up(threads[i]->s1);
-
+        mysem_up(threads[i]->s2);
 
         if(mysem_destroy(threads[i]->s1) == -1){
             printf("error in detsroy\n");

@@ -6,16 +6,11 @@ int counter = 0;
 int mysem_init(mysem_t *s, int n){
     //Check n value
     if(n!=0 && n!=1){
-        printf("Wrong argeument\n");
+        printf("Wrong arguement\n");
         return(0);
     }
 
-    //Check if sem is already initialized
-    if(s->init != 0){
-        printf("Sem is already initialized\n");
-        return(-1);
-    }
-
+    //Initialize and lock mutex
     if(pthread_mutex_init(&s->mutex, NULL) == -1){
         perror("mutex init");
         return(-1);
@@ -23,17 +18,24 @@ int mysem_init(mysem_t *s, int n){
 
     pthread_mutex_lock(&s->mutex);
 
+    //Check if sem is already initialized
+    if(s->init != 0){
+        printf("Sem is already initialized\n");
+        return(-1);
+    }
+
     //Create semaphore
     int key = ftok("./file", counter);
-    counter++;
     if(key == -1){
         perror("ftok");
         return(-1);
     }
+    counter++;
 
     s->sem_id = semget(key, 1, IPC_CREAT | 0666);
     if(s->sem_id == -1){
         perror("semget");
+
         pthread_mutex_unlock(&s->mutex);
         return(-1);
     }
@@ -48,12 +50,12 @@ int mysem_init(mysem_t *s, int n){
 
     s->init = 1;
     pthread_mutex_unlock(&s->mutex);
-    
     return(1);
 }
 
 // This function reduses semaphore's value by one
 int mysem_down(mysem_t *s){
+    //Check if sem is initialized
     if(!s->init) return(-1);
     
     pthread_mutex_lock(&s->mutex);
@@ -77,6 +79,8 @@ int mysem_up(mysem_t *s){
     if (!s->init) return(-1);
     
     //pthread_mutex_lock(&s->mutex);
+
+    
     
     struct sembuf sb;
     sb.sem_num = 0;
@@ -86,22 +90,29 @@ int mysem_up(mysem_t *s){
         perror("semop up failed");
         return -1;
     }
+    if(semctl(s->sem_id, 0, GETVAL) > 1){
+        sb.sem_num = 0;
+        sb.sem_op = -1;
+        sb.sem_flg = 0;
+        semop(s->sem_id, &sb, 1);
+    }
     
-    pthread_mutex_unlock(&s->mutex);
+    //printf("sem value %d\n", semctl(s->sem_id, 0, GETVAL));
 
+    pthread_mutex_unlock(&s->mutex);
     // printf("brika apo to mutex %lu\n", (unsigned long)pthread_self());
-    return 1;
+    return (1);
 }
 
 /*This function destroys a semaphore*/
 int mysem_destroy(mysem_t *s){
+    pthread_mutex_lock(&s->mutex); 
+    
     // Semaphore not initialized or destroyed
     if(s->init != 1){
         printf("Semaphore not init or already destroyed\n");
         return(-1);
     }
-
-    //pthread_mutex_lock(&s->mutex); 
 
     // Destroy semaphore
     if(semctl(s->sem_id, 0, IPC_RMID) == -1){ 
@@ -111,8 +122,7 @@ int mysem_destroy(mysem_t *s){
     }
 
     s->init = 0;
-    //pthread_mutex_unlock(&s->mutex);
-
+    pthread_mutex_unlock(&s->mutex);
     pthread_mutex_destroy(&s->mutex);
     return(1);
 }
