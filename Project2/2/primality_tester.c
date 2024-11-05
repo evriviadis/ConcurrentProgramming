@@ -70,9 +70,10 @@ int main(int argc, char* argv[]){
         mysem_down(threads[i]->s1);
         threads[i]->terminate = 1;
         mysem_up(threads[i]->s2);
-        mysem_down(threads[i]->s1);
-        mysem_up(threads[i]->s1);
-        mysem_up(threads[i]->s2);
+        
+        if(pthread_join(threads[i]->thread_id, NULL) != 0){
+            perror("pthread_join");
+        }
 
         if(mysem_destroy(threads[i]->s1) == -1){
             printf("error in detsroy\n");

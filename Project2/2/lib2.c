@@ -39,7 +39,6 @@ void* worker(void* arg){
 
         mysem_up(thread->s1);
     }
-    mysem_up(thread->s1);
     
     return NULL;
 }

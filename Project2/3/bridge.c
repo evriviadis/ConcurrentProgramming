@@ -2,7 +2,7 @@
 
 void* thread(void* args) {
     threadInfoT* thread = (threadInfoT*) args;
-    printf("hi im thread %ld\n",thread->threadId);
+    //printf("hi im thread %ld\n",thread->threadId);
     
         enterBridge(thread);
         sleep(3);
@@ -15,7 +15,16 @@ int main(int argc, char *argv[]) {
     if (argc != 4){
         perror("wrong arguments\n");
         return -1;
-    } 
+    }
+
+    pthread_mutex_init(&print_mutex, NULL);
+
+    info.semFlow = (mysem_t *) malloc(sizeof(mysem_t));
+    info.semFlow->init = 0;
+    if(mysem_init(info.semFlow,1)==-1){
+        printf("something wrong with init\n");
+        exit(-1);
+    }
 
     info.N = atoi(argv[1]);
     info.numRedCars = atoi(argv[2]);
@@ -31,16 +40,22 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < info.N ; i++){
         info.s[i] = (mysem_t *) malloc(sizeof(mysem_t));
         info.s[i]->init = 0;
-        mysem_init(info.s[i],1);
+        info.s[i]->sem_id = -1;
+        if(mysem_init(info.s[i], 1) == -1){
+            printf("something wrong with init\n");
+            exit(-1);
+        }
     }
     for (int i = 0; i < info.numRedCars; i++) {
         redThreads[i] = (threadInfoT *) malloc(sizeof(threadInfoT));
         redThreads[i]->color = RED;
+        redThreads[i]->threadIndex = i;
         pthread_create(&(redThreads[i]->threadId), NULL, thread, redThreads[i]);
     }
     for (int i = 0; i < info.numBlueCars; i++) {
         blueThreads[i] = (threadInfoT *) malloc(sizeof(threadInfoT));
         blueThreads[i]->color = BLUE;
+        blueThreads[i]->threadIndex = i;
         pthread_create(&(blueThreads[i]->threadId), NULL, thread, blueThreads[i]);
     }
 
@@ -61,6 +76,11 @@ int main(int argc, char *argv[]) {
     free(info.s);
     free(blueThreads);
     free(redThreads);
+
+    pthread_mutex_destroy(&print_mutex);
+    mysem_destroy(info.semFlow);
+
+    printf("everyone passed the bridge\n");
     
     return 0;
 }

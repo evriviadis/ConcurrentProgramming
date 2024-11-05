@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+//#define RED "\033[31m"
+
 typedef enum {
     BLUE = 0,
     RED = 1,
@@ -18,19 +20,23 @@ typedef struct {
     int N, numRedCars, numBlueCars;
     int i, passed, inBridge;
     color_t priority, flow;
-    mysem_t **s;
+    mysem_t **s, *semFlow;
 } carInfo_t;
 
 typedef struct {
     pthread_t threadId;
     color_t color;
     int semIndex;
+    int threadIndex;
 } threadInfoT;
 
 extern carInfo_t info;
+extern pthread_mutex_t print_mutex;
 
 extern int enterBridge(threadInfoT *thread);
 extern int exitBridge(threadInfoT *thread);
 extern int wannaEnter(threadInfoT *thread);
+extern void printWithColor(color_t color,char *text);
+extern int testFlow(color_t color);
 
 #endif

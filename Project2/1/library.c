@@ -28,6 +28,7 @@ int mysem_init(mysem_t *s, int n){
     int key = ftok("./file", counter);
     if(key == -1){
         perror("ftok");
+        pthread_mutex_unlock(&s->mutex);
         return(-1);
     }
     counter++;
@@ -58,7 +59,7 @@ int mysem_down(mysem_t *s){
     //Check if sem is initialized
     if(!s->init) return(-1);
     
-    pthread_mutex_lock(&s->mutex);
+    //pthread_mutex_lock(&s->mutex);
     // printf("mpika stin down sto mutex %lu\n", (unsigned long)pthread_self());
 
     struct sembuf sb;
@@ -78,27 +79,33 @@ int mysem_down(mysem_t *s){
 int mysem_up(mysem_t *s){
     if (!s->init) return(-1);
     
-    //pthread_mutex_lock(&s->mutex);
+    pthread_mutex_lock(&s->mutex);
+
+    //Check semaphores value before calling 'up'
+    int sem_value = semctl(s->sem_id, 0, GETVAL);
+    if( sem_value == 1){
+        pthread_mutex_unlock(&s->mutex);
+        return(0);
+    }else if(sem_value == -1){
+        perror("semctl UP");
+        pthread_mutex_unlock(&s->mutex);
+        return(-1);
+    }
     
+    //Calling up 
     struct sembuf sb;
     sb.sem_num = 0;
     sb.sem_op = 1;
     sb.sem_flg = 0;
     if(semop(s->sem_id, &sb, 1) == -1){
         perror("semop up failed");
-        return -1;
-    }
-    if(semctl(s->sem_id, 0, GETVAL) > 1){
-        sb.sem_num = 0;
-        sb.sem_op = -1;
-        sb.sem_flg = 0;
-        semop(s->sem_id, &sb, 1);
+        pthread_mutex_unlock(&s->mutex);
+        return (-1);
     }
     
     //printf("sem value %d\n", semctl(s->sem_id, 0, GETVAL));
-
     pthread_mutex_unlock(&s->mutex);
-    // printf("brika apo to mutex %lu\n", (unsigned long)pthread_self());
+    //printf("brika apo to mutex %lu\n", (unsigned long)pthread_self());
     return (1);
 }
 
