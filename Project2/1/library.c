@@ -2,7 +2,7 @@
 
 int counter = 0;
 
-/*THis function initializes a semaphore with n value.*/
+/*This function initializes a semaphore with n value.*/
 int mysem_init(mysem_t *s, int n){
     //Check n value
     if(n!=0 && n!=1){
@@ -39,7 +39,7 @@ int mysem_init(mysem_t *s, int n){
         pthread_mutex_unlock(&s->mutex);
         return(-1);
     }
-    printf("this is the id %d\n", s->sem_id);
+    printf("Init |this is the id %d\n", s->sem_id);
 
     //Initialize semaphore to n value
     if(semctl(s->sem_id, 0, SETVAL, n) == -1){
@@ -67,7 +67,7 @@ int mysem_down(mysem_t *s){
     sb.sem_flg = 0;
     if (semop(s->sem_id, &sb, 1) == -1) {
         perror("semop down failed");
-        return -1;
+        return (-1);
     }
     
     //pthread_mutex_unlock(&s->mutex);
@@ -79,8 +79,6 @@ int mysem_up(mysem_t *s){
     if (!s->init) return(-1);
     
     //pthread_mutex_lock(&s->mutex);
-
-    
     
     struct sembuf sb;
     sb.sem_num = 0;

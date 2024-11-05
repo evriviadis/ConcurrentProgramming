@@ -9,7 +9,7 @@
 #include <sys/sem.h>
 #include <unistd.h>
 
-// Semaphore type
+/*SEMAPHORE*/
 typedef struct {
     int sem_id;
     int init;
