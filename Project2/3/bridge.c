@@ -5,7 +5,7 @@ void* thread(void* args) {
     //printf("hi im thread %ld\n",thread->threadId);
     
         enterBridge(thread);
-        sleep(3);
+        sleep(0.1);
         exitBridge(thread);
 
     return NULL;
@@ -19,9 +19,9 @@ int main(int argc, char *argv[]) {
 
     pthread_mutex_init(&print_mutex, NULL);
 
-    info.semFlow = (mysem_t *) malloc(sizeof(mysem_t));
-    info.semFlow->init = 0;
-    if(mysem_init(info.semFlow,1)==-1){
+    info.semApply = (mysem_t *) malloc(sizeof(mysem_t));
+    info.semApply->init = 0;
+    if(mysem_init(info.semApply,1)==-1){
         printf("something wrong with init\n");
         exit(-1);
     }
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
     free(redThreads);
 
     pthread_mutex_destroy(&print_mutex);
-    mysem_destroy(info.semFlow);
+    mysem_destroy(info.semApply);
 
     printf("everyone passed the bridge\n");
     

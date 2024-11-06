@@ -20,7 +20,7 @@ typedef struct {
     int N, numRedCars, numBlueCars;
     int i, passed, inBridge;
     color_t priority, flow;
-    mysem_t **s, *semFlow;
+    mysem_t **s, *semApply;
 } carInfo_t;
 
 typedef struct {
@@ -38,5 +38,5 @@ extern int exitBridge(threadInfoT *thread);
 extern int wannaEnter(threadInfoT *thread);
 extern void printWithColor(color_t color,char *text);
 extern int testFlow(color_t color);
-
+extern int testPrio(color_t color);
 #endif
