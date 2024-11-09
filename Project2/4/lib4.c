@@ -8,19 +8,18 @@ int enter_train(){
     if(mysem_down(train.trainSem) == -1){
         printf("error in down\n");
     }
-    printf("-entered train-\n");
+    printf("\n-entered train-\n");
     train.emptySeats--;
     
     return 0;
 }
 
 int exit_train(){
-    printf("-ready to exit-\n");
     if(mysem_down(train.blockExit) == -1){
         printf("error in down exit train\n");
     }
     train.emptySeats++;
-    printf("-exited train-\n");
+    printf("\n-exited train-\n");
 
     mysem_up(train.readyToExit);
 
@@ -29,7 +28,7 @@ int exit_train(){
 
 void* trainFunc(){
     do{
-        printf("\n-train ready to go-\n");
+        printf("\n-Train Ready To Go-\n");
         mysem_down(train.blockTrain);
         
         if (train.eof) {
@@ -48,17 +47,16 @@ void* trainFunc(){
                 }else if(sem_res == -1){
                     printf("error in up\n");
                 }
-                printf("time: %d\n",i);
             }
         }
 
         sleep(3);
         
-        printf("-train is going-\n\n\n");
+        printf("\n-Train Arrived-\n");
         if (train.eof) {
             int up_res = mysem_up(train.blockExit);
             if(up_res == 0){
-                printf("lost call of up\n in time:\n\n\n");
+                printf("lost call of up\n");
             }else if(up_res == -1){
                 printf("error in up\n");
             }  
@@ -66,7 +64,7 @@ void* trainFunc(){
             for (int i = 0; i < MAX_SEATS; i++) {
                 int up_res = mysem_up(train.blockExit);
                 if(up_res == 0){
-                    printf("lost call of up\n in time: %d\n\n\n",i);
+                    printf("lost call of up\n");
                 }else if(up_res == -1){
                     printf("error in up\n");
                 }   
@@ -74,7 +72,7 @@ void* trainFunc(){
             }
         }
 
-        printf("-train ended trip-\n");
+        printf("\n-Train Ended Trip-\n");
         mysem_up(train.endedTrip);
     }while(!train.eof);    
         

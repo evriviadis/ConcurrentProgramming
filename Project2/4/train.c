@@ -2,12 +2,8 @@
 
 void* passFunction(void *args) {
     enter_train();
-    printf("PASS FUNCTION | Before exit\n");
-
-    //sleep(3);
-
+ 
     exit_train();
-    printf("PASS FUNCTION | After exit train\n");
 
     return(NULL);
 }
@@ -69,16 +65,15 @@ int main(int argc, char* argv[]) {
             mysem_down(train.endedTrip);
         }
     }
-    printf("\ni got my passengers\n");
     
     // Wait for passengers to finish
     for (int i = 0; i < totalPass; i++) {
         pthread_join(*(passengers[i]->threadId), NULL);
     }
     // Wait for train to finish
-    printf("im heree\n");
+
     pthread_join(*(train.threadId), NULL);    
-    printf("im there\n");
+
 
     mysem_destroy(train.trainSem);
     mysem_destroy(train.blockExit);

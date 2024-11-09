@@ -16,7 +16,6 @@ int enterBridge(threadInfoT *thread) {
             info.passed = 0;
             wannaEnter(thread);
             info.flow = thread->color;
-            printWithColor(NONE,"ENTER 1");
             printWithColor(info.flow,"flow");
             info.priority = NONE;
             break;
@@ -39,7 +38,6 @@ int enterBridge(threadInfoT *thread) {
             
             /* tote dilose endiaferon ston semaphore (fae block mexri na kanei free) */
             wannaEnter(thread);
-            printWithColor(NONE,"ENTER 2");
             printWithColor(info.flow,"flow");
             break;
         
@@ -50,7 +48,6 @@ int enterBridge(threadInfoT *thread) {
                 info.passed = 0;
                 wannaEnter(thread);
                 info.flow = thread->color;
-                printWithColor(NONE,"ENTER 3");
                 printWithColor(info.flow,"flow");
                 break;
             
@@ -91,10 +88,10 @@ int exitBridge(threadInfoT *thread) {
 int wannaEnter(threadInfoT *thread){
     
     printf("\033[0;37m");
-    printf("passed: %d, inbridge: %d\n",info.passed, info.inBridge);
+    printf("passed streak: %d, inbridge: %d\n",info.passed, info.inBridge);
     mysem_down(info.s[info.i]);
 
-
+    // THE CODE IS LIKE THIS IN THIS AREA CUZ THE RIGHT PART IS FOR PRINTING WITH COLOR AND VARIABLES IN THE SAME TIME
                                             pthread_mutex_lock(&print_mutex);
 
                                             if(thread->color == RED){

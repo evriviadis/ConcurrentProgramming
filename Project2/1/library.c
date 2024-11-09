@@ -81,6 +81,11 @@ int mysem_up(mysem_t *s){
     
     pthread_mutex_lock(&s->mutex);
 
+    if(!s->init){
+        pthread_mutex_unlock(&s->mutex);
+        return(-1);
+    }
+
     //Check semaphores value before calling 'up'
     int sem_value = semctl(s->sem_id, 0, GETVAL);
     if( sem_value == 1){
