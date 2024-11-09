@@ -1,0 +1,38 @@
+BRIDGE TRAFFIC CONTROL SYSTEM WITH CUSTOM SEMAPHORES
+
+DESCRIPTION
+This program simulates a bridge traffic control system, where red and blue cars need to cross a bridge with controlled access. Semaphore synchronization is used to manage bridge access and ensure that traffic flows smoothly with priority rules to avoid deadlocks or starvation. Red and blue cars operate in alternating flows based on the bridge’s current priority and flow direction, allowing cars of one color to pass until priority switches.
+
+DEVELOPMENT ENVIRONMENT
+Programming Language: C
+Operating System: Linux
+Compiler: GCC
+
+MODULE COMPONENTS
+Header Files:
+  - `library.h`: Defines the `mysem_t` semaphore structure and provides prototypes for semaphore operations (`mysem_init`, `mysem_down`, `mysem_up`, `mysem_destroy`).
+  - `lib3.h`: Defines structures `carInfo_t` and `threadInfoT` for storing car and thread information, along with functions for bridge entry and exit.
+- Implementation Files:
+  - `library.c`: Implements custom semaphore operations that manage access and synchronization.
+  - `lib3.c`: Implements core functions (`enterBridge`, `exitBridge`, and `wannaEnter`) to control car entry and exit on the bridge.
+  - `bridge.c`: Contains the main function, which initializes threads and semaphores, creates red and blue car threads, and handles cleanup.
+
+COMPILATION PROCESS
+To compile the program, use the `make` command:
+1. Navigate to the directory containing the files.
+2. Use `make` to compile all components, creating an executable named `bridge`.
+
+RUNNING PROCESS
+Run the program with the following command, specifying:
+<N> - the maximum number of cars allowed on the bridge at a time.
+<numRedCars> - the number of red cars.
+<numBlueCars> - the number of blue cars.
+
+Example:
+./bridge 3 5 5
+In this example, up to 3 cars may be on the bridge concurrently, with 5 red and 5 blue cars attempting to cross.
+
+AUTHORS AND ACKNOWLEDGEMENTS
+Liapis Evriviadis - 03646
+Plytas Evaggelos - 03674
+Tsiaousi Aikaterini - 03626

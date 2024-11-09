@@ -1,0 +1,29 @@
+SEMAPHORE SYNCHRONIZATION MODULE
+
+DESCRIPTION
+This module implements a custom semaphore (mysem_t) in C, providing basic synchronization mechanisms for concurrent programming. Using system V semaphores along with mutexes, it offers functions for initializing, incrementing (up), decrementing (down), and destroying a semaphore. This design can support resource control and mutual exclusion across multiple threads in a program.
+
+DEVELOPMENT ENVIRONMENT
+Programming Language: C
+Operating System: Linux
+Compiler: GCC
+
+MODULE COMPONENTS
+- Header File (`library.h`): Defines the `mysem_t` structure, shared variable `counter`, and function prototypes for semaphore operations.
+- Implementation File (`library.c`): Implements the functions for semaphore operations, including:
+  - `mysem_init(mysem_t s, int n)`: Initializes the semaphore to `n` (0 or 1).
+  - `mysem_down(mysem_t s)`: Decrements the semaphore, blocking if its value is 0.
+  - `mysem_up(mysem_t s)`: Increments the semaphore, allowing blocked threads to proceed if available.
+  - `mysem_destroy(mysem_t s)`: Destroys the semaphore, releasing any allocated resources.
+
+RUNNING PROCESS
+To use the semaphore functions:
+Include library.h in your program.
+Create an instance of mysem_t and initialize it with mysem_init().
+Use mysem_down() and mysem_up() for synchronization control as needed.
+Once synchronization is complete, use mysem_destroy() to clean up.
+
+AUTHORS AND ACKNOWLEDGEMENTS
+Liapis Evriviadis - 03646
+Plytas Evaggelos - 03674
+Tsiaousi Aikaterini - 03626

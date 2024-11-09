@@ -1,0 +1,29 @@
+TRAIN PASSENGER MANAGEMENT
+
+DESCRIPTION
+This project simulates a train system with a limited number of seats. Passengers enter and exit the train through a concurrent process managed by semaphores to ensure safe boarding and exiting. The train waits until seats are filled or EOF (end-of-file) is received from scanf, and then starts its journey. This program demonstrates the use of semaphores and threads to handle concurrent operations in C, providing an example of synchronization and resource management in a multi-threaded environment.
+
+DEVELOPMENT ENVIRONMENT
+Programming Language: C
+Operating System: Linux
+Compiler: GCC
+
+COMPILATION PROCESS
+Ensure GCC is installed: Run sudo apt-get install gcc if necessary.
+Compile the program: 
+In a terminal, navigate to the directory containing the Train Passenger Management project files.
+Use the command 'make' to compile the program, which generates an executable file named train.
+
+RUNNING PROCESS
+Run the program with the command: ./train <num_passengers>
+When prompted, input the number of passengers. The program will allocate passengers to the train in batches, ensuring that the train moves once the maximum number of seats is filled (or EOF is received).
+Each passenger thread will attempt to enter and exit the train, and the train will proceed on its trip once the seats are filled.
+Example:
+
+./train 10
+This command will simulate a train system with 10 passengers trying to board and exit in batches of 3.
+
+AUTHORS AND ACKNOWLEDGEMENT
+Liapis Evriviadis - 03646
+Plytas Evaggelos - 03674
+Tsiaousi Aikaterini - 03626
