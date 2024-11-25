@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
     }
 
     pthread_mutex_init(&print_mutex, NULL);
+    pthread_mutex_init(&clear_mutex, NULL);
 
     info.semApply = (mysem_t *) malloc(sizeof(mysem_t));
     info.semApply->init = 0;
@@ -29,6 +30,8 @@ int main(int argc, char *argv[]) {
     info.N = atoi(argv[1]);
     info.numRedCars = atoi(argv[2]);
     info.numBlueCars = atoi(argv[3]);
+    int BlueCars = info.numBlueCars;
+    int RedCars = info.numRedCars;
     info.priority = NONE;
     info.inBridge = 0;
     info.flow = NONE;
@@ -46,13 +49,13 @@ int main(int argc, char *argv[]) {
             exit(-1);
         }
     }
-    for (int i = 0; i < info.numRedCars; i++) {
+    for (int i = 0; i < RedCars; i++) {
         redThreads[i] = (threadInfoT *) malloc(sizeof(threadInfoT));
         redThreads[i]->color = RED;
         redThreads[i]->threadIndex = i;
         pthread_create(&(redThreads[i]->threadId), NULL, thread, redThreads[i]);
     }
-    for (int i = 0; i < info.numBlueCars; i++) {
+    for (int i = 0; i < BlueCars; i++) {
         blueThreads[i] = (threadInfoT *) malloc(sizeof(threadInfoT));
         blueThreads[i]->color = BLUE;
         blueThreads[i]->threadIndex = i;
@@ -60,11 +63,11 @@ int main(int argc, char *argv[]) {
     }
 
 
-    for (int i = 0; i < info.numRedCars; i++){
+    for (int i = 0; i < RedCars; i++){
         pthread_join((redThreads[i]->threadId),NULL);
         free(redThreads[i]);
     }   
-    for (int i = 0; i < info.numBlueCars; i++){
+    for (int i = 0; i < BlueCars; i++){
         pthread_join((blueThreads[i]->threadId),NULL);
         free(blueThreads[i]);
     }
@@ -78,6 +81,7 @@ int main(int argc, char *argv[]) {
     free(redThreads);
 
     pthread_mutex_destroy(&print_mutex);
+    pthread_mutex_destroy(&clear_mutex);
     mysem_destroy(info.semApply);
 
     printf("everyone passed the bridge\n");

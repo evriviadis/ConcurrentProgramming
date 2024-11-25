@@ -31,7 +31,7 @@ typedef struct {
 } threadInfoT;
 
 extern carInfo_t info;
-extern pthread_mutex_t print_mutex;
+extern pthread_mutex_t print_mutex, clear_mutex;
 
 extern int enterBridge(threadInfoT *thread);
 extern int exitBridge(threadInfoT *thread);
@@ -39,4 +39,5 @@ extern int wannaEnter(threadInfoT *thread);
 extern void printWithColor(color_t color,char *text);
 extern int testFlow(color_t color);
 extern int testPrio(color_t color);
+extern void clearPriority(threadInfoT *thread);
 #endif
