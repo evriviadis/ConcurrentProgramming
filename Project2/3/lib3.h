@@ -1,7 +1,7 @@
 #ifndef LIB3H
 #define LIB3H
 
-#include "../1/library.h"
+#include "../../Project3/Assignment1/lib1.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <pthread.h>

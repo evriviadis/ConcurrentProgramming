@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     for (int i = 0; i < info.N ; i++){
         info.s[i] = (mysem_t *) malloc(sizeof(mysem_t));
         info.s[i]->init = 0;
-        info.s[i]->sem_id = -1;
+        // info.s[i]->sem_id = -1;
         if(mysem_init(info.s[i], 1) == -1){
             printf("something wrong with init\n");
             exit(-1);

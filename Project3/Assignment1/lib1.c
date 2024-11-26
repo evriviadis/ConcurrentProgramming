@@ -1,9 +1,6 @@
-/*In this file there is an implementation of binary semaphores using monitor functionality in C.*/
+/* In this file there is an implementation of binary semaphores using monitor functionality */
 #include "lib1.h"
-#include <pthread.h>
-#include <stdio.h>
 
-/*Initialize Semaphore*/
 int mysem_init(mysem_t *s, int n){
     // Check arguement's value
     if(n!=0 && n!=1){
@@ -17,7 +14,7 @@ int mysem_init(mysem_t *s, int n){
         return(0);
     }
 
-    // Initiallization of mtx and cond for monitor
+    // Initiallization of mtx and condition for monitor
     if(pthread_mutex_init(&s->mtx, NULL) == -1){
         perror("Mutex init");
         return(0);
@@ -28,12 +25,12 @@ int mysem_init(mysem_t *s, int n){
         return(0);
     }
 
+    // Init of semaphore
     s->val = n;
     s->init = 1;
-    return(1)
+    return(1);
 }
 
-/*Semaphore decrease*/
 int mysem_down(mysem_t *s){    
     // Check sem initiallization            ------- CHECK MUTUAL EXCLUSION
     if(s->init != 1){
@@ -43,8 +40,8 @@ int mysem_down(mysem_t *s){
 
     pthread_mutex_lock(&s->mtx);
 
-    if(s->val == 0){                          //check if it needs while
-        printf("thread is going to wait\n");
+    while(s->val == 0){                          //check if it needs while - not correct
+        // printf("thread is going to wait\n");
         pthread_cond_wait(&s->queue, &s->mtx);
     }
 
@@ -54,26 +51,23 @@ int mysem_down(mysem_t *s){
     return(1);
 }
 
-/*Semaphore Increase*/
 int mysem_up(mysem_t *s){
     pthread_mutex_lock(&s->mtx);
 
     if(s->val == 1){
-        printf("Vlaue is already 1 exiting..\n");
+        printf("ERROR: Vlaue is already 1 exiting..\n");
         pthread_mutex_unlock(&s->mtx);
         return(0);
     }
 
     s->val++;
-    printf("Going to wake up the first one ");
+    // printf("Going to wake up the first one ");
     pthread_cond_signal(&s->queue);
     pthread_mutex_unlock(&s->mtx);
     return(1);
 }
 
-/*Semaphore Destroy*/
 int mysem_destroy(mysem_t *s){
-
     // Check initialization
     if(!s->init){
         printf("Semaphore already destroyed or initialized\n");
