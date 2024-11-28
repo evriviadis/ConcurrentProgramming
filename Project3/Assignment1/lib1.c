@@ -1,4 +1,4 @@
-/* In this file there is an implementation of binary semaphores using monitor functionality */
+/* In this file there is an implementation of binary semaphores using monitor functionality*/
 #include "lib1.h"
 
 int mysem_init(mysem_t *s, int n){
@@ -51,6 +51,7 @@ int mysem_down(mysem_t *s){
     return(1);
 }
 
+/*This function increases a binary semaphore*/
 int mysem_up(mysem_t *s){
     pthread_mutex_lock(&s->mtx);
 
@@ -67,10 +68,11 @@ int mysem_up(mysem_t *s){
     return(1);
 }
 
+/*This function destroys a binary semaphore*/
 int mysem_destroy(mysem_t *s){
     // Check initialization
     if(!s->init){
-        printf("Semaphore already destroyed or initialized\n");
+        printf("ERROR:Sem destroyed or initialized\n");
         return(-1);
     }
 
