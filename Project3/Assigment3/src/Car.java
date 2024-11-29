@@ -19,22 +19,15 @@ public class Car extends Thread {
             try{
                 monitor.desicion(this);
                 if(this.entered){
-            
-                    bridge.wannaEnter(this);
-                    monitor.exitbridge();
+
+                    bridge.enterBridge(this);
+                    Thread.sleep(2000);
+                    bridge.extiBridge(this);
 
                 }
 
             }catch (Exception e) {
             }   
-        }
-        //ColoredOutput.print("car " + this.index + " exited the bridge succesffully", this.color);
-    }
-
-    public synchronized void sleepy() {
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
         }
     }
 }

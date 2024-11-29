@@ -1,5 +1,6 @@
+import java.io.File;
 import java.util.Scanner;
-
+//import java.io.File;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -20,8 +21,13 @@ public class App {
         }
 
 
-
-        Scanner scanner = new Scanner(System.in);
+        //FOR INPUT FROM A FILE
+        Scanner scanner = new Scanner(new File("C:/Users/evris/ConcurrentProgramming/Project3/input.txt"));
+        
+        
+        
+        //FOR INPUT FROM TERMINAL TEXT
+        //Scanner scanner = new Scanner(System.in);
         int number = 0;
 
         System.out.println("Enter numbers (Ctrl+D to end on Linux/Mac, Ctrl+Z on Windows):");
@@ -42,6 +48,7 @@ public class App {
             } catch (Exception e) {
             }
         }
-
+        System.out.println("\n\n---Thanks for you time! Bye Bye---\n");
+        System.exit(1);
     }
 }

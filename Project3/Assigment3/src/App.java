@@ -9,7 +9,7 @@ public class App {
         int blueCars = Integer.parseInt(args[2]);
 
         inBridge bridge = new inBridge(N);
-        Monitor monitor = new Monitor(N, redCars, blueCars, bridge);
+        Monitor monitor = new Monitor(N, redCars, blueCars);
     
         for(int i=0 ; i<redCars ; i++){
             Car threadCar = new Car(monitor, "RED", i, bridge);
@@ -19,9 +19,6 @@ public class App {
             Car threadCar = new Car(monitor, "BLUE", i, bridge);
             threadCar.start();    
         }
-
     }
-
-
 }
 
