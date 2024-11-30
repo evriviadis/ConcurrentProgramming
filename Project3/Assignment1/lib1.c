@@ -1,6 +1,8 @@
-/* In this file there is an implementation of binary semaphores using monitor functionality*/
+/*In this file there is an implementation of binary 
+semaphores using monitor functionality in C.*/
 #include "lib1.h"
 
+/*This function initializes a binary semaphore*/
 int mysem_init(mysem_t *s, int n){
     // Check arguement's value
     if(n!=0 && n!=1){
@@ -8,9 +10,9 @@ int mysem_init(mysem_t *s, int n){
         return(0);
     }
 
-    // Check sem initiallization        ------- CHECK MUTUAL EXCLUSION
+    // Check initialization        
     if(s->init != 0){
-        printf("Sem already initiallized\n");
+        printf("Sem already initialized\n");
         return(0);
     }
 
@@ -25,44 +27,44 @@ int mysem_init(mysem_t *s, int n){
         return(0);
     }
 
-    // Init of semaphore
+    // Semaphore initialization
     s->val = n;
     s->init = 1;
     return(1);
 }
 
+/*This function decreases a semaphore*/
 int mysem_down(mysem_t *s){    
-    // Check sem initiallization            ------- CHECK MUTUAL EXCLUSION
+    // Check initialization
     if(s->init != 1){
         printf("Sem not initiallized yet\n");
         return(-1);
     }
 
     pthread_mutex_lock(&s->mtx);
-
-    while(s->val == 0){                          //check if it needs while - not correct
-        // printf("thread is going to wait\n");
+    // If value 0 wait
+    while(s->val == 0){
+        printf("thread is going to wait\n");
         pthread_cond_wait(&s->queue, &s->mtx);
     }
 
     s->val--;
     pthread_mutex_unlock(&s->mtx);
-    
     return(1);
 }
 
-/*This function increases a binary semaphore*/
+/*This function increases a semaphore*/
 int mysem_up(mysem_t *s){
     pthread_mutex_lock(&s->mtx);
-
+    // Check initialization
     if(s->val == 1){
-        printf("ERROR: Vlaue is already 1 exiting..\n");
+        printf("Value is already 1 exiting..\n");
         pthread_mutex_unlock(&s->mtx);
         return(0);
     }
 
     s->val++;
-    // printf("Going to wake up the first one ");
+    printf("Going to wake up the first one ");
     pthread_cond_signal(&s->queue);
     pthread_mutex_unlock(&s->mtx);
     return(1);
@@ -72,7 +74,7 @@ int mysem_up(mysem_t *s){
 int mysem_destroy(mysem_t *s){
     // Check initialization
     if(!s->init){
-        printf("ERROR:Sem destroyed or initialized\n");
+        printf("Semaphore already destroyed or initialized\n");
         return(-1);
     }
 
