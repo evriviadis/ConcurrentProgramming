@@ -48,7 +48,8 @@ public class App {
             } catch (Exception e) {
             }
         }
-        System.out.println("\n\n---Thanks for you time! Bye Bye---\n");
-        System.exit(1);
+        monitor.terminate();
+        //System.out.println("\n\n---Thanks for you time! Bye Bye---\n");
+        //System.exit(1);
     }
 }

@@ -1,3 +1,4 @@
+import java.lang.classfile.instruction.ThrowInstruction;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -6,6 +7,7 @@ public class Train extends Thread{
     public int fullSeats, newpassenger, inTrain = 0;
     public boolean startedTrain = false;
     public boolean cntrl_D = false;
+    public boolean terminated = false;
     public final Queue<Passenger> waitingQueue = new LinkedList<>();
     public final Queue<Passenger> QcuzOverPass = new LinkedList<>();
 
@@ -22,6 +24,10 @@ public class Train extends Thread{
 
                 this.startingTrip();
 
+                if(this.startedTrain == false){
+                    break;
+                }
+
                 System.out.println("\n---Starting Trip---\n");
                 Thread.sleep(2000);
                 System.out.println("\n---Ended Trip---\n");
@@ -32,6 +38,7 @@ public class Train extends Thread{
 
             }
             System.out.println("train terminated");
+            terminate();
         } catch (Exception e) {
         }
     }
@@ -44,7 +51,8 @@ public class Train extends Thread{
         if(this.inTrain != this.fullSeats){
             wait();
             if(cntrl_D){
-                System.exit(1);
+                this.startedTrain = false;
+                return;
             }
         }
         this.startedTrain = true;
@@ -55,13 +63,7 @@ public class Train extends Thread{
 
         this.startedTrain = false;
         for(int i =0 ; i<fullSeats ; i++){
-            
-            /* System.out.print("Current queue to leave the train: ");
-            for (Passenger pas : waitingQueue) {
-                System.out.print("Pas " + pas.index + " -> ");
-            }
-            System.out.println(" ");
-             */
+        
             Passenger passenger = addPasstoQ(null, 1);
             
             this.inTrain--;
@@ -69,6 +71,15 @@ public class Train extends Thread{
         }
         Thread.sleep(100);
         System.out.println("\n\nPassengers left to be serviced: " + currentSeats + "\n\n");
+    }
+
+    public synchronized void terminate() throws InterruptedException {
+        this.terminated = true;
+        for(int i =0 ; i<this.inTrain ; i++){
+        
+            Passenger passenger = addPasstoQ(null, 1);
+            passenger.notifiPass();
+        }
     }
 
 
@@ -80,7 +91,9 @@ public class Train extends Thread{
         while(this.inTrain >= this.fullSeats){
             
             //this.addPasstoQ2(pas, 0);
+            //System.out.println("Passenger " + pas.index + "| Hi i didnt fit to the train train\n");
             wait();
+        
             if(this.inTrain >= this.fullSeats){
                 notify();
             }else{

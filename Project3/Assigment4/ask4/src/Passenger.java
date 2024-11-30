@@ -17,12 +17,15 @@ class Passenger extends Thread {
         } catch (Exception e) {
         }
 
+    
         //
         /*Wait for train to end the trip */
         try{
             this.waitForTrain();
         }catch (Exception e){
         }
+
+        
 
         /*Get off the train */
         
@@ -31,19 +34,19 @@ class Passenger extends Thread {
     public synchronized void waitForTrain() throws InterruptedException{
         
         wait();
-        
-        System.out.println("Passenger " + this.index+ " | I exited the train\n");
-    }
 
-    public synchronized void waitPass() throws InterruptedException{
+        if(this.train.cntrl_D){
 
-        System.out.println("Im waiting here");
-        wait();
+            System.out.println("Passenger "+ this.index + " left unsatisfied :(");
+            
+        }else{
 
+            System.out.println("Passenger " + this.index+ " | I exited the train\n");
+
+        }
     }
 
     public synchronized void notifiPass() throws InterruptedException{
-        //System.out.println("Passenger: " + this.index + " | Waked up");
         notify();
     }
 }

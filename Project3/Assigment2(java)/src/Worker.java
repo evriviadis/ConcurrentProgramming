@@ -12,13 +12,16 @@ public class Worker extends Thread{
         try{
             while(true){
                 nubmerToCheck = this.monitor.grabNumber();
+                if(this.monitor.isTerminated()){
+                    break;
+                }
                 isPrime(nubmerToCheck);
             }
 
 
         } catch (Exception e) {
         }
-    
+        System.out.println("Worker " + this.id + " is terminating.");
     }
 
     public static boolean isPrime(int number) {
