@@ -4,9 +4,6 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/sem.h>
 #include <unistd.h>
 
 /*BINARY SEMAPHORE*/
