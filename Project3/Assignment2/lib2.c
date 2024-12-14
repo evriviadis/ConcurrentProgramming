@@ -15,48 +15,31 @@ int is_prime(int num){
     return 1;
 }
 
-void monitor_init(monitor_t *mon) {
-    if (pthread_mutex_init(&mon->mutex, NULL)) {
+/*This function initalizes a monitor*/
+void monitor_init() {
+    if (pthread_mutex_init(&monitor.mutex, NULL)) {
         perror("ERROR: Mutex Init");
     }
-    if (pthread_cond_init(&mon->cond1, NULL) || pthread_cond_init(&mon->cond2, NULL)) {
+    if (pthread_cond_init(&monitor.cond, NULL)) {
         perror("ERROR: Cond Init");
-    }
-    mon->cond1_val = 0; mon->cond1_va2 = 0;
+    }   
+
+    //Initialize anything else you put into monitor
 }
 
-void assign_work(monitor_t *mon, number_to_check) {
-    
+void assign_work(thread_infoT *thread, int number_to_check) {
+    pthread_mutex_lock(&monitor.mutex);
+
+    thread->number_to_check = number_to_check;
+    pthread_cond_signal(&monitor.condition);
+
+    pthread_mutex_unlock(&monitor.mutex);
 }
 
-void monitor_wait(monitor_t *mon) {
-    pthread_mutex_lock(&mon->mutex);
-    while (mon->resource_flag == 0) {  // Wait for resource to become available
-        pthread_cond_wait(&mon->condition, &mon->mutex);
-    }
-    mon->resource_flag = 0;
-    pthread_mutex_unlock(&mon->mutex);
+void monitor_destroy() {
+    pthread_mutex_destroy(&monitor.mutex);
+    pthread_cond_destroy(&monitor.condition);
 }
-
-void monitor_signal(monitor_t *mon) {
-    pthread_mutex_lock(&mon->mutex);
-
-    if (mon->resource_flag == 1) {
-        printf("ERROR: Resource flag is already 1\n");
-    }
-    else {
-        mon->resource_flag = 1;
-        pthread_cond_signal(&mon->condition);
-    }
-    pthread_mutex_unlock(&mon->mutex);
-}
-
-void monitor_destroy(monitor_t *mon) {
-    pthread_mutex_destroy(&mon->mutex);
-    pthread_cond_destroy(&mon->cond1);
-    pthread_cond_destroy(&mon->cond2);
-}
-
 
 /*This function is the worker. It takes as input an 
 integer array, and tells if it's content is prime or not*/
@@ -65,7 +48,13 @@ void* worker(void* arg){
     thread_infoT* thread = (thread_infoT*) arg;
         
     while(1){
-        mysem_down(thread->s2);
+
+        //wait until a job is given
+        //monitor wait
+    
+        pthread_cond_wait(&monitor.cond, &monitor.mutex);
+    
+        //mysem_down(thread->s2);
         if (thread->terminate) break;
 
         result = is_prime(thread->number_to_check); 
@@ -75,7 +64,7 @@ void* worker(void* arg){
         else{
             printf("The %d is Not Prime: %d\n", thread->number_to_check, result);
         }
-        mysem_up(thread->s1);
+        //mysem_up(thread->s1);
     }
     
     return NULL;

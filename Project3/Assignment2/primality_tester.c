@@ -3,7 +3,7 @@
 /*This is main. It assigns jobs to all threads created,
 and tells them when it's time to finish.*/
 int main(int argc, char* argv[]){
-    int N = atoi(argv[1]);
+    N = atoi(argv[1]);
     int input, i;
     thread_infoT** threads;
 
@@ -11,6 +11,9 @@ int main(int argc, char* argv[]){
         printf("Wrong number of args\n");
         return(-1);
     }
+
+    // Initialize Monitor
+    monitor_init();
 
     //Allocate memory for all the workers
     threads = (thread_infoT**) malloc(sizeof(thread_infoT*) * N);
@@ -27,15 +30,8 @@ int main(int argc, char* argv[]){
             return(-1);
         }
 
-        threads[i]->m = (monitor_t *) malloc(sizeof(monitor_t));
-        if (threads[i]->m == NULL) {
-            perror("malloc");
-            return -1;
-        }
-
         // threads[i]->s1 = (mysem_t*) malloc(sizeof(mysem_t));
         // threads[i]->s2 = (mysem_t*) malloc(sizeof(mysem_t));
-
         // threads[i]->s1->init = 0;
         // threads[i]->s2->init = 0;
 
@@ -49,34 +45,37 @@ int main(int argc, char* argv[]){
         //     return(-1);
         // }
 
-        threads[i]->terminate = 0; 
+        // threads[i]->terminate = 0; 
         threads[i]->number_to_check = 0;
         
         if(pthread_create(&(threads[i]->thread_id), NULL, worker, threads[i]) != 0){
             perror("Failed to create thread");
             return(-1);
         }
+
     }  
 
     //Get input data and assign work to the threads
     printf("Enter integers (Ctrl+D to stop):\n");
     int j = 0;
     while(scanf("%d", &input) != EOF){
-        for(; j<N; j++){
-            assign_work(threads[j]->m, input);
+        // find free worker to assign work
+        assign_work(threads[j], input);
+        // for(; j<N; j++){ 
             // mysem_down(threads[j]->s1);
             // threads[j]->number_to_check = input;
             // mysem_up(threads[j]->s2);
-            break;
-        }
+            // break;
+        // }
         if(j>=N) j = 0;
     }
 
     //After EOF wait for workers to finish their job
     for(i = 0; i < N; i++){   
-        mysem_down(threads[i]->s1);
-        threads[i]->terminate = 1;
-        mysem_up(threads[i]->s2);
+        terminate_thread(thread[i]);
+        // mysem_down(threads[i]->s1);
+        // threads[i]->terminate = 1;
+        // mysem_up(threads[i]->s2);
         
         if(pthread_join(threads[i]->thread_id, NULL) != 0){
             perror("pthread_join");
