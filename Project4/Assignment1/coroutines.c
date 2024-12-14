@@ -2,7 +2,7 @@
 
 // Initialization of the main coroutine
 int mycoroutines_init(co_t *main) {
-    if (!main) return -1;
+    if (main == NULL) return -1;
 
     if (getcontext(&main->context) == -1) return -1;
 
@@ -36,6 +36,7 @@ int mycoroutines_switchto(co_t *co) {
     co_t *prev_co = current_co;
     current_co = co;
     if (swapcontext(&prev_co->context, &co->context) == -1) return -1;
+
     return 0;
 }
 

@@ -12,7 +12,7 @@ typedef struct{
     int init;
     pthread_mutex_t mtx;
     pthread_cond_t queue;
-} mysem_t;
+} mysem_t
 
 /*FUNCTIONS*/
 extern int mysem_init(mysem_t *s, int n);
