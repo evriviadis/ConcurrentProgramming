@@ -27,7 +27,6 @@ int mycoroutines_create(co_t *co, void (body)(void *), void *arg) {
     co->context.uc_stack.ss_sp = co->stack;
     co->context.uc_stack.ss_size = STACK_SIZE;
     co->context.uc_link = &main_co.context; // when coroutine finishes return to &main_co.context
-    // printf("%d ", main_co.finished, main_co.context.uc_stack.ss_size);
     co->finished = 0;
     makecontext(&co->context, (void (*)(void))body, 1, arg);
     return 0;
@@ -48,7 +47,7 @@ int mycoroutines_destroy(co_t *co) {
     if (!co || co->finished) return -1;
 
     if (co->stack != NULL) free(co->stack);
-    else printf("UNsuccess free \n");
+    else printf("Unsuccessful free\n");
     co->stack = NULL;
     co->finished = 1;
     printf("success destroy\n");

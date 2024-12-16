@@ -21,5 +21,4 @@ extern int mycoroutines_init(co_t *main);
 extern int mycoroutines_create(co_t *co, void (body)(void *), void *arg);
 extern int mycoroutines_switchto(co_t *co);
 extern int mycoroutines_destroy(co_t *co);
-
 #endif

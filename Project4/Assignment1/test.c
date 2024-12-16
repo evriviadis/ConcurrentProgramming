@@ -37,20 +37,12 @@ int main() {
     mycoroutines_create(&producer_co, producer, &consumer_co);
     mycoroutines_create(&consumer_co, consumer, &producer_co);
 
-    // while (!producer_co.finished || !consumer_co.finished) {
-    //     if (!producer_co.finished) mycoroutines_switchto(&producer_co);
-    //     printf("i finished producting\n");
-    //     if (!consumer_co.finished) mycoroutines_switchto(&consumer_co);
-    //     printf("i finished consuming\n");
-    // }
     mycoroutines_switchto(&producer_co);
     printf("i finished producting\n");
     mycoroutines_switchto(&consumer_co);
     printf("i finished consuming\n");
     mycoroutines_destroy(&producer_co);
     mycoroutines_destroy(&consumer_co);
-
-    // printf("current co %d\n", current_co->finished); // ! SEGV HERE BECAUSE CURRENT_CO IS DESTROYED
 
     free(main_co.context.uc_stack.ss_sp);
     printf("\n\n--Here im in the end--\n\n");
