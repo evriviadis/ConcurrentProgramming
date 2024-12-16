@@ -4,6 +4,7 @@
 #define PIPE_SIZE 64
 #define NUM_OF_PIPES 2
 
+#include "../coroutines.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -35,6 +36,7 @@ typedef struct{
 }thread_argsT;
 
 /*GLOBAL VARIABLES*/
+extern co_t coroutine1, coroutine2;
 extern pipeT** pipebase;
 extern int id_counter;
 

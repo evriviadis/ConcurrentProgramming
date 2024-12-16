@@ -1,5 +1,5 @@
-program: program.o library.o
-	gcc -Wall -g program.o library.o ../coroutines.o -o program
+program: program.o library.o coroutines.o
+	gcc -Wall -g program.o library.o coroutines.o -o program
 
 program.o: program.c library.h ../coroutines.h
 	gcc -Wall -g -c program.c

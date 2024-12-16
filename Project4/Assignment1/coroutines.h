@@ -14,8 +14,8 @@ typedef struct co {
 } co_t;
 
 // with static current_co and main_co can't be accessed by other files other than coroutines.c
-static co_t *current_co;
-static co_t main_co;
+extern co_t *current_co;
+extern co_t main_co;
 
 extern int mycoroutines_init(co_t *main);
 extern int mycoroutines_create(co_t *co, void (body)(void *), void *arg);

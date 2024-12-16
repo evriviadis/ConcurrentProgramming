@@ -2,6 +2,7 @@
 
 pipeT** pipebase = NULL;
 int id_counter = 0 ;
+co_t coroutine1, coroutine2;
 
 /*This function opens a pipe- Allocates dynamically
 and initializes a ring buffer. Returns pipe id.*/

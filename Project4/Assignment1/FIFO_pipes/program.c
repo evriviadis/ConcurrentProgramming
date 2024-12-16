@@ -1,9 +1,7 @@
 #include "library.h"
 #include "../coroutines.h"
 
-co_t coroutine1, coroutine2;
-
-void* thread1(void* arg){
+void thread1(void* arg){
     printf("Hi I'm thread 1\n");
     int file_dir, read=0, p_write;
     char byte='\0'; 
@@ -18,7 +16,7 @@ void* thread1(void* arg){
     if (file_dir == -1) {
         perror("file");
         args->finished = 1;
-        return(NULL);
+        return;
     }
 
     while(1) {
@@ -37,11 +35,12 @@ void* thread1(void* arg){
             
             if(p_write == -1){
                 args->finished = 1;
-                return(NULL);
+                return;
             }
         }
         else {
-            printf("1|write| thread 1 is waitting...\n");                   
+            printf("1|write| thread 1 is waitting...\n");
+            mycoroutines_switchto(&coroutine2);
         }
     }
     printf("\n");
@@ -62,7 +61,7 @@ void* thread1(void* arg){
     if (copy2_fd == -1){
         perror("copy2");
         args->finished = 1;
-        return(NULL);
+        return;
     }
 
     while(1){
@@ -84,7 +83,7 @@ void* thread1(void* arg){
                 writeResult = my_write(&copy2_fd, &byte, 1);
                 if(writeResult == -1){
                     args->finished = 1;
-                    return(NULL);
+                    mycoroutines_switchto(&main_co);
                 }
             }else if(readResult == 0){
            
@@ -95,7 +94,7 @@ void* thread1(void* arg){
             
         }else{
             printf("1|read| thread 1 is waitting...\n");
-            printf("1|read| is pipe write open? : %d\n", args->pipe_read->write_open);
+            mycoroutines_switchto(&coroutine2);
         }
 
         if((!args->pipe_read->write_open) && (args->pipe_read->read_edge == args->pipe_read->write_edge) && (args->pipe_read->cyclesRead == args->pipe_read->cyclesWrite)){
@@ -106,10 +105,10 @@ void* thread1(void* arg){
 
     free(fileCopy2);
     args->finished = 1;
-    return NULL;
+    mycoroutines_switchto(&main_co);
 }
 
-void* thread2(void* arg){
+void thread2(void* arg){
     printf("Hi I'm thread 2\n");
     thread_argsT* args;
     args = (thread_argsT *)arg;
@@ -130,7 +129,7 @@ void* thread2(void* arg){
     if (copy_fd == -1){
         perror("copy");
         args->finished = 1;
-        return(NULL);
+        return;
     }
 
     while(1){
@@ -150,7 +149,7 @@ void* thread2(void* arg){
                 writeResult = my_write(&copy_fd, &byte, 1);
                 if(writeResult == -1){
                     args->finished = 1;
-                    return(NULL);
+                    return;
                 }
             }else if(readResult == 0){
            
@@ -160,7 +159,7 @@ void* thread2(void* arg){
             }
         }else{
             printf("2|read| thread 2 is waitting...\n");
-            printf("2|read| is pipe write open?: %d\n", args->pipe_read->write_open);
+            mycoroutines_switchto(&coroutine1);
         }
 
         if((!args->pipe_read->write_open) && (args->pipe_read->read_edge == args->pipe_read->write_edge) && (args->pipe_read->cyclesRead == args->pipe_read->cyclesWrite)){
@@ -172,7 +171,7 @@ void* thread2(void* arg){
     if(close(copy_fd) == -1){
         perror("close file:");
         args->finished = 1;
-        return(NULL);
+        return;
     }
 
     //WRITTNG IN PIPE 2
@@ -180,7 +179,7 @@ void* thread2(void* arg){
     if (copy_fd == -1){
         perror("copy");
         args->finished = 1;
-        return(NULL);
+        return;
     }
 
     while(1)
@@ -202,10 +201,11 @@ void* thread2(void* arg){
             //printf("2|write| THIS IS THE BYTE THAT I JUST READ: %c\n",read);
             if(pipe_write(args->pipe_write->id, byte) == -1){
                 args->finished = 1;
-                return(NULL);
+                return;
             }
         }else{
-            printf("2|write| thread 2 is waitting...\n");                   
+            printf("2|write| thread 2 is waitting...\n");    
+            mycoroutines_switchto(&coroutine1);               
         }
     }
 
@@ -215,11 +215,11 @@ void* thread2(void* arg){
 
     free(fileCopy);
     args->finished = 1;
-    return (NULL);
+    mycoroutines_switchto(&coroutine1);
 }
 
 int main(int argc, char *argv[]) {
-    pthread_t p1, p2;
+    //pthread_t p1, p2;
     thread_argsT thread1_args, thread2_args;
 
     // check if starting args are correct
@@ -262,11 +262,10 @@ int main(int argc, char *argv[]) {
     pthread_create(&p2, NULL, thread2, &thread2_args); */
     
 
-    mycoroutines_create(&coroutine1, thread1, &coroutine2);
-    mycoroutines_create(&coroutine2, thread2, &coroutine1);
+    mycoroutines_create(&coroutine1, thread1, &thread1_args);
+    mycoroutines_create(&coroutine2, thread2, &thread2_args);
 
     mycoroutines_switchto(&coroutine1);
-    mycoroutines_switchto(&coroutine2);
 
     //Waiting for threads to finish
     mycoroutines_destroy(&coroutine1);
@@ -274,5 +273,6 @@ int main(int argc, char *argv[]) {
 
     //remember to free memory!!!!!! - for pipebase!!!
     free(thread1_args.file_name);
+    printf("TA KATAFERAME!!!!\n\n");
     return 0;
 }

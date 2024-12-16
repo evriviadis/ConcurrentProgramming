@@ -1,5 +1,7 @@
 #include "coroutines.h"
 
+co_t main_co, *current_co;
+
 // Initialization of the main coroutine
 int mycoroutines_init(co_t *main) {
     if (main == NULL) return -1;
