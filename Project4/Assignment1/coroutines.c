@@ -5,8 +5,10 @@ int mycoroutines_init(co_t *main) {
     if (main == NULL) return -1;
 
     if (getcontext(&main->context) == -1) return -1;
-
-    main->stack = NULL; // the main coroutine doesn't need excess stack
+    main->context.uc_stack.ss_sp = (void *) malloc(STACK_SIZE); // Allocate a stack for main_co
+    if (!main->context.uc_stack.ss_sp) return -1;
+    main->context.uc_stack.ss_size = STACK_SIZE;
+    main->context.uc_link = NULL; // No context to return to after main
     main->finished = 0;
     current_co = main;
     return 0;
@@ -17,7 +19,7 @@ int mycoroutines_init(co_t *main) {
 int mycoroutines_create(co_t *co, void (body)(void *), void *arg) {
     if (!co || !body) return -1;
 
-    co->stack = (void*) malloc(STACK_SIZE);
+    co->stack = (void *) malloc(STACK_SIZE);
     if (!co->stack) return -1;
 
     if (getcontext(&co->context) == -1) return -1;
@@ -25,16 +27,18 @@ int mycoroutines_create(co_t *co, void (body)(void *), void *arg) {
     co->context.uc_stack.ss_sp = co->stack;
     co->context.uc_stack.ss_size = STACK_SIZE;
     co->context.uc_link = &main_co.context; // when coroutine finishes return to &main_co.context
+    // printf("%d ", main_co.finished, main_co.context.uc_stack.ss_size);
     co->finished = 0;
     makecontext(&co->context, (void (*)(void))body, 1, arg);
     return 0;
 }
 
 int mycoroutines_switchto(co_t *co) {
-    if (!co || co->finished) return -1;
+    if (co == NULL || co->finished == 1) return -1;
 
     co_t *prev_co = current_co;
     current_co = co;
+    printf("Switching context: %p -> %p\n", prev_co, current_co);
     if (swapcontext(&prev_co->context, &co->context) == -1) return -1;
 
     return 0;

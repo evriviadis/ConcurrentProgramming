@@ -15,7 +15,8 @@ void producer(void *arg) {
         buffer[count++] = i;
         printf("Produced: %d\n", i);
     }
-    // mycoroutines_switchto(arg);
+    printf("producer finished\n");
+    mycoroutines_switchto(&main_co);
 }
 
 void consumer(void *arg) {
@@ -26,7 +27,8 @@ void consumer(void *arg) {
         int item = buffer[--count];
         printf("Consumed: %d\n", item);
     }
-    // mycoroutines_switchto(arg);
+    printf("consumer finished\n");
+    mycoroutines_switchto(&main_co);
 }
 
 int main() {
@@ -35,14 +37,23 @@ int main() {
     mycoroutines_create(&producer_co, producer, &consumer_co);
     mycoroutines_create(&consumer_co, consumer, &producer_co);
 
-    while (!producer_co.finished || !consumer_co.finished) {
-        if (!producer_co.finished) mycoroutines_switchto(&producer_co);
-        printf("i finished producting\n");
-        if (!consumer_co.finished) mycoroutines_switchto(&consumer_co);
-    }
+    // while (!producer_co.finished || !consumer_co.finished) {
+    //     if (!producer_co.finished) mycoroutines_switchto(&producer_co);
+    //     printf("i finished producting\n");
+    //     if (!consumer_co.finished) mycoroutines_switchto(&consumer_co);
+    //     printf("i finished consuming\n");
+    // }
+    mycoroutines_switchto(&producer_co);
+    printf("i finished producting\n");
+    mycoroutines_switchto(&consumer_co);
+    printf("i finished consuming\n");
+    mycoroutines_destroy(&producer_co);
+    mycoroutines_destroy(&consumer_co);
 
-    printf("current co %d\n", current_co->finished);
+    // printf("current co %d\n", current_co->finished); // ! SEGV HERE BECAUSE CURRENT_CO IS DESTROYED
 
+    free(main_co.context.uc_stack.ss_sp);
     printf("\n\n--Here im in the end--\n\n");
+
     return 0;
 }
