@@ -1,6 +1,7 @@
-#include "coroutines.h"
+#include "lib2.h"
 
 co_t main_co, *current_co;
+mythr_t *current_thread, main_thread;
 
 // Initialization of the main coroutine
 int mycoroutines_init(co_t *main) {
@@ -57,16 +58,60 @@ int mycoroutines_destroy(co_t *co) {
 }
 
 int mythreads_init() {
+    mycoroutines_init(&main_co);
+    main_thread.coroutine = main_co;
+    main_thread.finished = 0;
+    main_thread.next = NULL;
+    main_thread.status = READY;
+    
+    current_thread = &main_thread;
+
+    return 1;
+}
+
+int mythreads_create(mythr_t *thr, void (body)(void *), void *arg){
+    mycoroutines_create(&thr->coroutine, (void (*)(void))body, arg);
+    thr->finished = 0; 
+    thr->next = NULL;
+
+    mythr_t *loopthr;
+    loopthr = current_thread;
+
+    while(loopthr->next != NULL){
+        loopthr = loopthr->next;
+    }
+    loopthr->next = thr;
+
+    return 1;
+}
+
+int mythreads_yield(){
+    if(current_thread->next != NULL){
+        
+        while(current_thread->next->status != READY){
+            current_thread = current_thread->next;
+        }
+    
+        co_t toThread = current_thread->next->coroutine;
+        
+        current_thread = current_thread->next;
+        
+        mycoroutines_switchto(&toThread);
+
+        return 1;
+    }else{
+        printf("No other thread on the list");
+        return -1;
+    }
+}
+
+int mythreads_sleep(int secs) {
     
 }
 
-
-int mythreads_create(mythr_t *thr, void (body)(void *), void *arg);
-int mythreads_yield();
-int mythreads_sleep(int secs);
 int mythreads_join(mythr_t *thr);
 int mythreads_destroy(mythr_t *thr);
-int mythreads_sem_create(mysem_t *s, int val);
+/* int mythreads_sem_create(mysem_t *s, int val);
 int mythreads_sem_down(mysem_t *s);
 int mythreads_sem_up(mysem_t *s);
-int mythreads_sem_destroy(mysem_t *s);
+int mythreads_sem_destroy(mysem_t *s); */
