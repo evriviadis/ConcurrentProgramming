@@ -4,8 +4,13 @@
 #include <ucontext.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 #define STACK_SIZE 2048
+#define TIME_QUANTUM 2
+#define MIN_SLEEP_CHECK 0.1
 
 typedef enum status {
     READY = 0,
@@ -24,6 +29,8 @@ typedef struct mythr {
     co_t coroutine;
     int finished;
     status_t status;
+    int id;
+    int sleepTime;
 } mythr_t;
 
 // with static current_co and main_co can't be accessed by other files other than coroutines.c
@@ -31,6 +38,11 @@ extern co_t *current_co;
 extern co_t main_co;
 extern mythr_t *current_thread;
 extern mythr_t main_thread;
+extern int idCounter;
+extern int minSleepTime;
+
+extern void print_chain();
+extern void update_sleep();
 
 extern int mycoroutines_init(co_t *main);
 extern int mycoroutines_create(co_t *co, void (body)(void *), void *arg);

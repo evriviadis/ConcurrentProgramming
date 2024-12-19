@@ -2,6 +2,8 @@
 
 co_t main_co, *current_co;
 mythr_t *current_thread, main_thread;
+int idCounter = 0;
+int minSleepTime = 0;
 
 // Initialization of the main coroutine
 int mycoroutines_init(co_t *main) {
@@ -40,7 +42,7 @@ int mycoroutines_switchto(co_t *co) {
 
     co_t *prev_co = current_co;
     current_co = co;
-    printf("Switching context: %p -> %p\n", prev_co, current_co);
+    //printf("Switching context: %p -> %p\n", prev_co, current_co);
     if (swapcontext(&prev_co->context, &co->context) == -1) return -1;
 
     return 0;
@@ -61,8 +63,9 @@ int mythreads_init() {
     mycoroutines_init(&main_co);
     main_thread.coroutine = main_co;
     main_thread.finished = 0;
-    main_thread.next = NULL;
+    main_thread.next = &main_thread;
     main_thread.status = READY;
+    main_thread.id = -1;
     
     current_thread = &main_thread;
 
@@ -70,14 +73,16 @@ int mythreads_init() {
 }
 
 int mythreads_create(mythr_t *thr, void (body)(void *), void *arg){
-    mycoroutines_create(&thr->coroutine, (void (*)(void))body, arg);
+    mycoroutines_create(&thr->coroutine, body, arg);
     thr->finished = 0; 
-    thr->next = NULL;
+    thr->status = READY;
+    thr->sleepTime = 0;
+    thr->next = current_thread;
 
     mythr_t *loopthr;
     loopthr = current_thread;
-
-    while(loopthr->next != NULL){
+    
+    while(loopthr->next != current_thread ){
         loopthr = loopthr->next;
     }
     loopthr->next = thr;
@@ -86,16 +91,17 @@ int mythreads_create(mythr_t *thr, void (body)(void *), void *arg){
 }
 
 int mythreads_yield(){
-    if(current_thread->next != NULL){
+    print_chain();
+    if(current_thread->next != current_thread){
         
         while(current_thread->next->status != READY){
             current_thread = current_thread->next;
         }
     
         co_t toThread = current_thread->next->coroutine;
-        
+
         current_thread = current_thread->next;
-        
+
         mycoroutines_switchto(&toThread);
 
         return 1;
@@ -105,8 +111,36 @@ int mythreads_yield(){
     }
 }
 
-int mythreads_sleep(int secs) {
+void print_chain(){
+    mythr_t *loop;
+    loop = current_thread;
+
+    do{
+        printf("%d(%d) --> ",loop->id,loop->sleepTime);
+        loop = loop->next;
+    }while(loop != current_thread);
     
+    printf("%d\n\n",current_thread->id);
+}
+
+void update_sleep(){
+    mythr_t *loop = current_thread;
+    do{     
+        if(loop->status == SLEEP && loop->sleepTime != 0){
+            loop->sleepTime -= MIN_SLEEP_CHECK;
+            if(loop->sleepTime == 0){
+                loop->status = READY;
+            }
+        }
+        loop = loop->next;
+    }while(loop != current_thread);
+}
+
+int mythreads_sleep(int secs) {
+    current_thread->status = SLEEP;
+    current_thread->sleepTime = secs;
+    mythreads_yield();
+    return 1;
 }
 
 int mythreads_join(mythr_t *thr);
