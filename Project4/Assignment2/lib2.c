@@ -4,6 +4,9 @@ co_t main_co, *current_co;
 mythr_t *current_thread, main_thread;
 int idCounter = 0;
 int minSleepTime = 0;
+pthread_mutex_t lock;
+mysem_t *s;
+
 
 // Initialization of the main coroutine
 int mycoroutines_init(co_t *main) {
@@ -31,7 +34,7 @@ int mycoroutines_create(co_t *co, void (body)(void *), void *arg) {
     
     co->context.uc_stack.ss_sp = co->stack;
     co->context.uc_stack.ss_size = STACK_SIZE;
-    co->context.uc_link = &main_co.context; // when coroutine finishes return to &main_co.context
+    co->context.uc_link = &main_thread.coroutine.context; // when coroutine finishes return to &main_co.context
     co->finished = 0;
     makecontext(&co->context, (void (*)(void))body, 1, arg);
     return 0;
@@ -60,8 +63,8 @@ int mycoroutines_destroy(co_t *co) {
 }
 
 int mythreads_init() {
-    mycoroutines_init(&main_co);
     main_thread.coroutine = main_co;
+    mycoroutines_init(&main_thread.coroutine);
     main_thread.finished = 0;
     main_thread.next = &main_thread;
     main_thread.status = READY;
@@ -73,11 +76,16 @@ int mythreads_init() {
 }
 
 int mythreads_create(mythr_t *thr, void (body)(void *), void *arg){
+
+    thr->id = idCounter;
+    idCounter++;
+
     mycoroutines_create(&thr->coroutine, body, arg);
     thr->finished = 0; 
     thr->status = READY;
     thr->sleepTime = 0;
     thr->next = current_thread;
+    thr->blocked = NULL;
 
     mythr_t *loopthr;
     loopthr = current_thread;
@@ -91,32 +99,40 @@ int mythreads_create(mythr_t *thr, void (body)(void *), void *arg){
 }
 
 int mythreads_yield(){
-    print_chain();
+    pthread_mutex_lock(&lock);
+
+    //print_chain();
     if(current_thread->next != current_thread){
         
         while(current_thread->next->status != READY){
             current_thread = current_thread->next;
         }
     
-        co_t toThread = current_thread->next->coroutine;
+        co_t *toThread = &current_thread->next->coroutine;
 
         current_thread = current_thread->next;
 
-        mycoroutines_switchto(&toThread);
+        pthread_mutex_unlock(&lock);
+
+        mycoroutines_switchto(toThread);
 
         return 1;
     }else{
+        pthread_mutex_unlock(&lock);
         printf("No other thread on the list");
         return -1;
     }
 }
 
 void print_chain(){
+    
     mythr_t *loop;
     loop = current_thread;
 
     do{
-        printf("%d(%d) --> ",loop->id,loop->sleepTime);
+        printf("%d status: %d --> ",loop->id, loop->status);
+        //printf("%d(%d) context: %p, status: %d --> \n",loop->id, loop->sleepTime, &loop->coroutine, loop->status);
+        
         loop = loop->next;
     }while(loop != current_thread);
     
@@ -124,28 +140,116 @@ void print_chain(){
 }
 
 void update_sleep(){
+    pthread_mutex_lock(&lock);
+   
     mythr_t *loop = current_thread;
     do{     
         if(loop->status == SLEEP && loop->sleepTime != 0){
-            loop->sleepTime -= MIN_SLEEP_CHECK;
-            if(loop->sleepTime == 0){
+            loop->sleepTime = loop->sleepTime - 1000000/* MIN_SLEEP_CHECK */;
+            //printf("\n In update: -> id: %d \n",loop->id);
+            printf("\n In update: -> id: %d sleep: %d\n",loop->id,loop->sleepTime);
+            if(loop->sleepTime <= 0){
                 loop->status = READY;
+                loop->sleepTime = 0;
             }
         }
         loop = loop->next;
     }while(loop != current_thread);
+   
+    pthread_mutex_unlock(&lock);
 }
 
 int mythreads_sleep(int secs) {
+    pthread_mutex_lock(&lock);
+
     current_thread->status = SLEEP;
-    current_thread->sleepTime = secs;
+    current_thread->sleepTime = secs * 1000000;
+
+    pthread_mutex_unlock(&lock);
     mythreads_yield();
+    
     return 1;
 }
 
-int mythreads_join(mythr_t *thr);
-int mythreads_destroy(mythr_t *thr);
-/* int mythreads_sem_create(mysem_t *s, int val);
-int mythreads_sem_down(mysem_t *s);
-int mythreads_sem_up(mysem_t *s);
-int mythreads_sem_destroy(mysem_t *s); */
+int mythreads_join(mythr_t *thr){
+    printf("finished: %d\n",thr->finished);
+    while(!thr->finished){
+        //wait;
+        //yeild?
+    }
+    return 1 ;
+}
+int mythreads_destroy(mythr_t *thr){
+    mythr_t *loop = thr;
+    int id = thr->id;
+
+    while(loop->next != thr){
+        loop = loop->next;
+    }
+    loop->next = thr->next;
+
+    mycoroutines_destroy(&thr->coroutine);
+    free(thr);
+
+    printf("thread %d destroyed\n",id);
+    return 1;
+}
+
+int mythreads_sem_create(mysem_t *s, int val){
+    s->value=val;
+    s->blocked = NULL;
+    return 1;
+}
+
+int mythreads_sem_down(mysem_t *s){
+    pthread_mutex_lock(&lock);
+    
+    if(!s->value){
+        if(s->blocked != NULL){
+            mythr_t *loop = s->blocked;
+            while(loop->blocked != NULL){
+                loop = loop->blocked;
+            }
+            loop->blocked = current_thread;
+        }else{
+            s->blocked = current_thread;
+        }
+        current_thread->status = BLOCK;
+        
+        pthread_mutex_unlock(&lock);
+        mythreads_yield();
+    }else{
+        s->value--;
+    }
+    
+    pthread_mutex_unlock(&lock);
+    return 1;
+}
+
+int mythreads_sem_up(mysem_t *s){
+    pthread_mutex_lock(&lock);
+
+    if(s->value){
+        printf("lost call of up in sem\n");
+    }else{
+        s->value++;
+        if(s->blocked!=NULL){
+            mythr_t *thr = s->blocked;
+            s->blocked = s->blocked->blocked;
+            thr->status = READY;
+            thr->blocked = NULL;
+            s->value--;
+        }
+    }
+    pthread_mutex_unlock(&lock);
+    return 1;
+}
+
+int mythreads_sem_destroy(mysem_t *s){
+    if(s->blocked!= NULL){
+        printf("threads still blocked in the semaphore\n");
+    }
+    free(s);
+    printf("semaphore destroyed\n");
+    return 1;
+}

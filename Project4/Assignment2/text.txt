@@ -1,0 +1,350 @@
+All threads are created!!!
+
+
+Timer hits!!
+
+Coroutine 0: iteration 0
+Coroutine 1: iteration 0
+Coroutine 2: iteration 0
+
+ In update: -> id: 0 sleep: 900000
+
+ In update: -> id: 1 sleep: 900000
+
+ In update: -> id: 2 sleep: 900000
+
+ In update: -> id: 0 sleep: 800000
+
+ In update: -> id: 1 sleep: 800000
+
+ In update: -> id: 2 sleep: 800000
+
+ In update: -> id: 0 sleep: 700000
+
+ In update: -> id: 1 sleep: 700000
+
+ In update: -> id: 2 sleep: 700000
+
+ In update: -> id: 0 sleep: 600000
+
+ In update: -> id: 1 sleep: 600000
+
+ In update: -> id: 2 sleep: 600000
+
+ In update: -> id: 0 sleep: 500000
+
+ In update: -> id: 1 sleep: 500000
+
+ In update: -> id: 2 sleep: 500000
+
+ In update: -> id: 0 sleep: 400000
+
+ In update: -> id: 1 sleep: 400000
+
+ In update: -> id: 2 sleep: 400000
+
+ In update: -> id: 0 sleep: 300000
+
+ In update: -> id: 1 sleep: 300000
+
+ In update: -> id: 2 sleep: 300000
+
+ In update: -> id: 0 sleep: 200000
+
+ In update: -> id: 1 sleep: 200000
+
+ In update: -> id: 2 sleep: 200000
+
+ In update: -> id: 0 sleep: 100000
+
+ In update: -> id: 1 sleep: 100000
+
+ In update: -> id: 2 sleep: 100000
+
+ In update: -> id: 0 sleep: 0
+
+ In update: -> id: 1 sleep: 0
+
+ In update: -> id: 2 sleep: 0
+
+
+Timer hits!!
+
+Coroutine 0: iteration 1
+Coroutine 1: iteration 1
+Coroutine 2: iteration 1
+
+ In update: -> id: 0 sleep: 900000
+
+ In update: -> id: 1 sleep: 900000
+
+ In update: -> id: 2 sleep: 900000
+
+ In update: -> id: 0 sleep: 800000
+
+ In update: -> id: 1 sleep: 800000
+
+ In update: -> id: 2 sleep: 800000
+
+ In update: -> id: 0 sleep: 700000
+
+ In update: -> id: 1 sleep: 700000
+
+ In update: -> id: 2 sleep: 700000
+
+ In update: -> id: 0 sleep: 600000
+
+ In update: -> id: 1 sleep: 600000
+
+ In update: -> id: 2 sleep: 600000
+
+ In update: -> id: 0 sleep: 500000
+
+ In update: -> id: 1 sleep: 500000
+
+ In update: -> id: 2 sleep: 500000
+
+ In update: -> id: 0 sleep: 400000
+
+ In update: -> id: 1 sleep: 400000
+
+ In update: -> id: 2 sleep: 400000
+
+ In update: -> id: 0 sleep: 300000
+
+ In update: -> id: 1 sleep: 300000
+
+ In update: -> id: 2 sleep: 300000
+
+ In update: -> id: 0 sleep: 200000
+
+ In update: -> id: 1 sleep: 200000
+
+ In update: -> id: 2 sleep: 200000
+
+ In update: -> id: 0 sleep: 100000
+
+ In update: -> id: 1 sleep: 100000
+
+ In update: -> id: 2 sleep: 100000
+
+ In update: -> id: 0 sleep: 0
+
+ In update: -> id: 1 sleep: 0
+
+ In update: -> id: 2 sleep: 0
+
+
+Timer hits!!
+
+Coroutine 0: iteration 2
+Coroutine 1: iteration 2
+Coroutine 2: iteration 2
+
+ In update: -> id: 0 sleep: 900000
+
+ In update: -> id: 1 sleep: 900000
+
+ In update: -> id: 2 sleep: 900000
+
+ In update: -> id: 0 sleep: 800000
+
+ In update: -> id: 1 sleep: 800000
+
+ In update: -> id: 2 sleep: 800000
+
+ In update: -> id: 0 sleep: 700000
+
+ In update: -> id: 1 sleep: 700000
+
+ In update: -> id: 2 sleep: 700000
+
+ In update: -> id: 0 sleep: 600000
+
+ In update: -> id: 1 sleep: 600000
+
+ In update: -> id: 2 sleep: 600000
+
+ In update: -> id: 0 sleep: 500000
+
+ In update: -> id: 1 sleep: 500000
+
+ In update: -> id: 2 sleep: 500000
+
+ In update: -> id: 0 sleep: 400000
+
+ In update: -> id: 1 sleep: 400000
+
+ In update: -> id: 2 sleep: 400000
+
+ In update: -> id: 0 sleep: 300000
+
+ In update: -> id: 1 sleep: 300000
+
+ In update: -> id: 2 sleep: 300000
+
+ In update: -> id: 0 sleep: 200000
+
+ In update: -> id: 1 sleep: 200000
+
+ In update: -> id: 2 sleep: 200000
+
+ In update: -> id: 0 sleep: 100000
+
+ In update: -> id: 1 sleep: 100000
+
+ In update: -> id: 2 sleep: 100000
+
+ In update: -> id: 0 sleep: 0
+
+ In update: -> id: 1 sleep: 0
+
+ In update: -> id: 2 sleep: 0
+
+
+Timer hits!!
+
+Coroutine 0: iteration 3
+Coroutine 1: iteration 3
+Coroutine 2: iteration 3
+
+ In update: -> id: 0 sleep: 900000
+
+ In update: -> id: 1 sleep: 900000
+
+ In update: -> id: 2 sleep: 900000
+
+ In update: -> id: 0 sleep: 800000
+
+ In update: -> id: 1 sleep: 800000
+
+ In update: -> id: 2 sleep: 800000
+
+ In update: -> id: 0 sleep: 700000
+
+ In update: -> id: 1 sleep: 700000
+
+ In update: -> id: 2 sleep: 700000
+
+ In update: -> id: 0 sleep: 600000
+
+ In update: -> id: 1 sleep: 600000
+
+ In update: -> id: 2 sleep: 600000
+
+ In update: -> id: 0 sleep: 500000
+
+ In update: -> id: 1 sleep: 500000
+
+ In update: -> id: 2 sleep: 500000
+
+ In update: -> id: 0 sleep: 400000
+
+ In update: -> id: 1 sleep: 400000
+
+ In update: -> id: 2 sleep: 400000
+
+ In update: -> id: 0 sleep: 300000
+
+ In update: -> id: 1 sleep: 300000
+
+ In update: -> id: 2 sleep: 300000
+
+ In update: -> id: 0 sleep: 200000
+
+ In update: -> id: 1 sleep: 200000
+
+ In update: -> id: 2 sleep: 200000
+
+ In update: -> id: 0 sleep: 100000
+
+ In update: -> id: 1 sleep: 100000
+
+ In update: -> id: 2 sleep: 100000
+
+ In update: -> id: 0 sleep: 0
+
+ In update: -> id: 1 sleep: 0
+
+ In update: -> id: 2 sleep: 0
+
+
+Timer hits!!
+
+Coroutine 0: iteration 4
+Coroutine 1: iteration 4
+Coroutine 2: iteration 4
+
+ In update: -> id: 0 sleep: 900000
+
+ In update: -> id: 1 sleep: 900000
+
+ In update: -> id: 2 sleep: 900000
+
+ In update: -> id: 0 sleep: 800000
+
+ In update: -> id: 1 sleep: 800000
+
+ In update: -> id: 2 sleep: 800000
+
+ In update: -> id: 0 sleep: 700000
+
+ In update: -> id: 1 sleep: 700000
+
+ In update: -> id: 2 sleep: 700000
+
+ In update: -> id: 0 sleep: 600000
+
+ In update: -> id: 1 sleep: 600000
+
+ In update: -> id: 2 sleep: 600000
+
+ In update: -> id: 0 sleep: 500000
+
+ In update: -> id: 1 sleep: 500000
+
+ In update: -> id: 2 sleep: 500000
+
+ In update: -> id: 0 sleep: 400000
+
+ In update: -> id: 1 sleep: 400000
+
+ In update: -> id: 2 sleep: 400000
+
+ In update: -> id: 0 sleep: 300000
+
+ In update: -> id: 1 sleep: 300000
+
+ In update: -> id: 2 sleep: 300000
+
+ In update: -> id: 0 sleep: 200000
+
+ In update: -> id: 1 sleep: 200000
+
+ In update: -> id: 2 sleep: 200000
+
+ In update: -> id: 0 sleep: 100000
+
+ In update: -> id: 1 sleep: 100000
+
+ In update: -> id: 2 sleep: 100000
+
+ In update: -> id: 0 sleep: 0
+
+ In update: -> id: 1 sleep: 0
+
+ In update: -> id: 2 sleep: 0
+
+
+Timer hits!!
+
+Coroutine 0 finished
+Coroutine 1 finished
+Coroutine 2 finished
+Im back at main
+success destroy
+thread 0 destroied
+success destroy
+thread 1 destroied
+success destroy
+thread 2 destroied

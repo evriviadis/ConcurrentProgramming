@@ -7,15 +7,18 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <time.h>
+#include <pthread.h>
 
 #define STACK_SIZE 2048
-#define TIME_QUANTUM 2
-#define MIN_SLEEP_CHECK 0.1
+#define TIME_QUANTUM 1
+#define MIN_SLEEP_CHECK 100000
 
 typedef enum status {
-    READY = 0,
+    READY = 3,
     SLEEP = 1,
-    BLOCK = 2
+    BLOCK = 2,
+    FINISH = 4
 } status_t;
 
 typedef struct co {
@@ -31,7 +34,14 @@ typedef struct mythr {
     status_t status;
     int id;
     int sleepTime;
+    struct mythr *blocked;
 } mythr_t;
+
+typedef struct mysem {
+    int value;
+    mythr_t *blocked;
+}mysem_t;
+
 
 // with static current_co and main_co can't be accessed by other files other than coroutines.c
 extern co_t *current_co;
@@ -40,6 +50,8 @@ extern mythr_t *current_thread;
 extern mythr_t main_thread;
 extern int idCounter;
 extern int minSleepTime;
+extern pthread_mutex_t lock;
+extern mysem_t *s;
 
 extern void print_chain();
 extern void update_sleep();
@@ -55,9 +67,9 @@ extern int mythreads_yield();
 extern int mythreads_sleep(int secs);
 extern int mythreads_join(mythr_t *thr);
 extern int mythreads_destroy(mythr_t *thr);
-/* extern int mythreads_sem_create(mysem_t *s, int val);
+extern int mythreads_sem_create(mysem_t *s, int val);
 extern int mythreads_sem_down(mysem_t *s);
 extern int mythreads_sem_up(mysem_t *s);
-extern int mythreads_sem_destroy(mysem_t *s); */
+extern int mythreads_sem_destroy(mysem_t *s);
 
 #endif
