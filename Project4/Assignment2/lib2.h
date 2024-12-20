@@ -53,6 +53,7 @@ extern int minSleepTime;
 extern pthread_mutex_t lock;
 extern mysem_t *s;
 
+
 extern void print_chain();
 extern void update_sleep();
 
@@ -71,5 +72,6 @@ extern int mythreads_sem_create(mysem_t *s, int val);
 extern int mythreads_sem_down(mysem_t *s);
 extern int mythreads_sem_up(mysem_t *s);
 extern int mythreads_sem_destroy(mysem_t *s);
+
 
 #endif

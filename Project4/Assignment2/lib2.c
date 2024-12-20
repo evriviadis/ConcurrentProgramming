@@ -7,7 +7,6 @@ int minSleepTime = 0;
 pthread_mutex_t lock;
 mysem_t *s;
 
-
 // Initialization of the main coroutine
 int mycoroutines_init(co_t *main) {
     if (main == NULL) return -1;
@@ -71,7 +70,6 @@ int mythreads_init() {
     main_thread.id = -1;
     
     current_thread = &main_thread;
-
     return 1;
 }
 
@@ -99,7 +97,7 @@ int mythreads_create(mythr_t *thr, void (body)(void *), void *arg){
 }
 
 int mythreads_yield(){
-    pthread_mutex_lock(&lock);
+   // pthread_mutex_lock(&lock);
 
     //print_chain();
     if(current_thread->next != current_thread){
@@ -112,7 +110,7 @@ int mythreads_yield(){
 
         current_thread = current_thread->next;
 
-        pthread_mutex_unlock(&lock);
+        //pthread_mutex_unlock(&lock);
 
         mycoroutines_switchto(toThread);
 
@@ -228,6 +226,7 @@ int mythreads_sem_down(mysem_t *s){
 
 int mythreads_sem_up(mysem_t *s){
     pthread_mutex_lock(&lock);
+    
 
     if(s->value){
         printf("lost call of up in sem\n");
